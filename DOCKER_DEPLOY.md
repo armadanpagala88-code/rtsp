@@ -254,6 +254,12 @@ sudo lsof -i :3008
 # Kill process atau ubah port di docker-compose.yml
 ```
 
+### Coolify / Nixpacks Deployment
+
+Jika Anda menggunakan Coolify dan mendapatkan eror "FFmpeg NOT FOUND", pastikan:
+1. File `nixpacks.toml` ada di root project.
+2. Jika masih eror, ubah **Build Pack** di setting Coolify dari **Nixpacks** ke **Docker**.
+
 ### Database error
 
 ```bash
