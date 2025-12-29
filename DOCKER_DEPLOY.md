@@ -20,6 +20,15 @@ cd rtsp
 # Atau upload file via SCP/SFTP
 ```
 
+### 1a. Install Dependencies (Non-Docker)
+
+Jika tidak menggunakan Docker, jalankan script berikut untuk menginstal FFmpeg dan library lainnya:
+
+```bash
+chmod +x install_dependencies.sh
+./install_dependencies.sh
+```
+
 ### 2. Build dan Run dengan Docker Compose
 
 ```bash

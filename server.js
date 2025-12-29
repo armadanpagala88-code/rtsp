@@ -1981,6 +1981,31 @@ wss.on('connection', (ws, req) => {
 
 const PORT = process.env.PORT || 3008;
 
+/**
+ * Check if FFmpeg is installed and accessible
+ * @returns {Promise<boolean>}
+ */
+function checkFfmpeg() {
+  return new Promise((resolve) => {
+    const ffmpeg = spawn('ffmpeg', ['-version']);
+
+    ffmpeg.on('error', (err) => {
+      console.error('❌ FFmpeg NOT FOUND:', err.message);
+      resolve(false);
+    });
+
+    ffmpeg.on('close', (code) => {
+      if (code === 0) {
+        console.log('✅ FFmpeg is installed and accessible');
+        resolve(true);
+      } else {
+        console.error(`❌ FFmpeg exited with code ${code}`);
+        resolve(false);
+      }
+    });
+  });
+}
+
 async function startServer() {
   try {
     await initDatabase();
@@ -1993,6 +2018,16 @@ async function startServer() {
     } catch (error) {
       console.warn('Warning: AI Detection model failed to initialize:', error.message);
       console.warn('Detection features will be disabled');
+    }
+
+    // Check FFmpeg
+    const ffmpegAvailable = await checkFfmpeg();
+    if (!ffmpegAvailable) {
+      console.error('CRITICAL: FFmpeg is required for RTSP streaming.');
+      console.error('Please install FFmpeg:');
+      console.error('  Ubuntu/Debian: sudo apt update && sudo apt install -y ffmpeg');
+      console.error('  CentOS/RHEL: sudo yum install ffmpeg');
+      console.error('  macOS: brew install ffmpeg');
     }
 
     server.listen(PORT, () => {
