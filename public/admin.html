@@ -1,0 +1,2654 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - CCTV Kabupaten Konawe</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        :root {
+            --bg-primary: #0c1222;
+            --bg-secondary: #141d2f;
+            --bg-card: #1a2642;
+            --bg-card-hover: #223054;
+            --border-color: #2a3a5c;
+            --accent: #3b82f6;
+            --accent-light: #60a5fa;
+            --accent-glow: rgba(59, 130, 246, 0.25);
+            --success: #22c55e;
+            --warning: #eab308;
+            --danger: #ef4444;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --gold: #fbbf24;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Login Page */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(251, 191, 36, 0.05) 0%, transparent 50%),
+                var(--bg-primary);
+            padding: 2rem;
+        }
+
+        .login-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 3rem;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .login-logo {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--accent) 0%, #1d4ed8 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 8px 30px var(--accent-glow);
+        }
+
+        .login-header h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .login-header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px 14px 48px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--accent) 0%, #1d4ed8 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            margin-top: 0.5rem;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--accent-glow);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .login-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 1.5rem;
+            color: var(--danger);
+            font-size: 0.85rem;
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .login-error.show {
+            display: flex;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--accent-light);
+        }
+
+        /* Dashboard */
+        .dashboard {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .login-container.hidden {
+            display: none;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-logo {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--accent) 0%, #1d4ed8 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+        }
+
+        .header-title h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .header-title span {
+            font-size: 0.75rem;
+            color: var(--gold);
+            font-weight: 500;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .user-info i {
+            color: var(--accent);
+        }
+
+        .user-info span {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 500;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent) 0%, #1d4ed8 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-card);
+            border-color: var(--accent);
+            color: var(--text-primary);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .main-content .tabs-container {
+            margin-top: 0;
+            margin-bottom: 2rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .stat-icon.blue {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--accent);
+        }
+
+        .stat-icon.green {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+        }
+
+        .stat-icon.red {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+        }
+
+        .stat-info h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-info p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* CCTV Table */
+        .table-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-header h2 i {
+            color: var(--accent);
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            padding: 10px 16px 10px 40px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.85rem;
+            width: 280px;
+            transition: all 0.3s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+        }
+
+        th {
+            background: var(--bg-secondary);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        td {
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        tr:hover td {
+            background: rgba(59, 130, 246, 0.03);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-badge.active {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+        }
+
+        .status-badge.inactive {
+            background: rgba(100, 116, 139, 0.15);
+            color: var(--text-muted);
+        }
+
+        .status-badge .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .action-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .action-btn.delete:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: var(--border-color);
+        }
+
+        /* ROI Canvas */
+        .video-container canvas.roi-canvas {
+            pointer-events: auto !important;
+            cursor: crosshair !important;
+            z-index: 15 !important;
+            background: transparent;
+        }
+
+        .video-container.roi-mode {
+            cursor: crosshair;
+        }
+
+        .video-container.roi-mode img {
+            pointer-events: none;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 2rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-header h3 i {
+            color: var(--accent);
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: none;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group select {
+            cursor: pointer;
+        }
+
+        .map-picker {
+            height: 200px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            margin-top: 8px;
+        }
+
+        .map-picker-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 300px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .toast i {
+            font-size: 1.25rem;
+        }
+
+        .toast.success i {
+            color: var(--success);
+        }
+
+        .toast.error i {
+            color: var(--danger);
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .toast-message {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        /* Tabs */
+        .tabs-container {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            gap: 1rem;
+            margin: 0 0 2rem 0 !important;
+            padding: 1rem 2rem !important;
+            border-bottom: 2px solid var(--border-color);
+            background: var(--bg-secondary) !important;
+            border-radius: 12px 12px 0 0;
+            width: 100% !important;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 10;
+            min-height: 60px;
+        }
+
+        /* Ensure tabs are always visible */
+        main.main-content > .tabs-container {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        .tab-btn {
+            padding: 12px 24px !important;
+            background: transparent !important;
+            border: none !important;
+            border-bottom: 3px solid transparent !important;
+            color: var(--text-secondary) !important;
+            font-family: inherit;
+            font-size: 0.95rem !important;
+            font-weight: 600 !important;
+            cursor: pointer;
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            position: relative;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        /* Ensure tab buttons are always visible */
+        .tabs-container .tab-btn {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Settings Container */
+        .settings-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+        }
+
+        .setting-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s;
+        }
+
+        .setting-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.1);
+        }
+
+        .setting-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .setting-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+        }
+
+        .setting-icon.kecamatan {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        }
+
+        .setting-icon.kelurahan {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        }
+
+        .setting-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .setting-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .slider-container {
+            position: relative;
+        }
+
+        .slider-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .slider {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--bg-primary);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+            transition: all 0.3s;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.6);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+        }
+
+        .slider-value {
+            min-width: 60px;
+            text-align: right;
+            font-weight: 600;
+            color: var(--accent);
+            font-size: 0.9rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            transition: 0.3s;
+            border-radius: 26px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--text-secondary);
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+            background-color: white;
+        }
+
+        .btn-save {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--accent) 0%, #1d4ed8 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+
+        .btn-save:hover {
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .btn-save:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+        }
+
+        .alert.show {
+            display: flex;
+        }
+
+        .alert-success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .tabs-container {
+                padding: 0.75rem 1rem;
+                flex-wrap: wrap;
+            }
+
+            .tab-btn {
+                padding: 10px 16px;
+                font-size: 0.85rem;
+            }
+
+            .settings-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .table-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .search-box input {
+                width: 100%;
+            }
+
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Container -->
+    <div class="login-container" id="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <div class="login-logo">
+                    <i class="fas fa-shield-halved"></i>
+                </div>
+                <h1>Admin Login</h1>
+                <p>CCTV Kabupaten Konawe</p>
+            </div>
+
+            <div class="login-error" id="login-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="error-message">Username atau password salah</span>
+            </div>
+
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="username" class="form-input" placeholder="Masukkan username" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" class="form-input" placeholder="Masukkan password" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-login" id="btn-login">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Masuk
+                </button>
+            </form>
+
+            <a href="/" class="back-link">
+                <i class="fas fa-arrow-left"></i> Kembali ke Peta CCTV
+            </a>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard" id="dashboard">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <div class="header-logo">
+                    <i class="fas fa-video"></i>
+                </div>
+                <div class="header-title">
+                    <h1>Admin Dashboard</h1>
+                    <span>CCTV Kabupaten Konawe</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <i class="fas fa-user-shield"></i>
+                    <span id="admin-name">Admin</span>
+                </div>
+                <a href="/admin-users.html" class="btn btn-outline" id="btn-users" style="display:none;">
+                    <i class="fas fa-users"></i>
+                    Users
+                </a>
+                <a href="/admin-wilayah.html" class="btn btn-outline" id="btn-wilayah" style="display:none;">
+                    <i class="fas fa-map"></i>
+                    Wilayah
+                </a>
+                <a href="/admin-trash-bins.html" class="btn btn-outline" id="btn-trash-bins" style="display:none;">
+                    <i class="fas fa-trash-alt"></i>
+                    Bak Sampah
+                </a>
+                <a href="/" class="btn btn-outline">
+                    <i class="fas fa-map"></i>
+                    Lihat Peta
+                </a>
+                <button class="btn btn-secondary" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Tabs -->
+            <div class="tabs-container" style="display: flex !important; visibility: visible !important; opacity: 1 !important;">
+                <button class="tab-btn active" onclick="switchTab('cctv', this)" style="display: flex !important; visibility: visible !important;">
+                    <i class="fas fa-video"></i>
+                    CCTV
+                </button>
+                <button class="tab-btn" onclick="switchTab('layer-settings', this)" style="display: flex !important; visibility: visible !important;">
+                    <i class="fas fa-sliders-h"></i>
+                    Pengaturan Layer
+                </button>
+            </div>
+
+            <!-- CCTV Tab -->
+            <div id="tab-cctv" class="tab-content active">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Manajemen CCTV</h1>
+                    <p class="page-subtitle">Kelola semua kamera CCTV di Kabupaten Konawe</p>
+                </div>
+                <button class="btn btn-primary" onclick="openAddModal()">
+                    <i class="fas fa-plus"></i>
+                    Tambah CCTV
+                </button>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="total-cctv">0</h3>
+                        <p>Total CCTV</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="active-cctv">0</h3>
+                        <p>CCTV Aktif</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="inactive-cctv">0</h3>
+                        <p>CCTV Nonaktif</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h2>
+                        <i class="fas fa-list"></i>
+                        Daftar CCTV
+                    </h2>
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="search-input" placeholder="Cari CCTV...">
+                    </div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nama</th>
+                            <th>Lokasi</th>
+                            <th>Koordinat</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cctv-table-body">
+                        <!-- Data will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+            </div>
+
+            <!-- Layer Settings Tab -->
+            <div id="tab-layer-settings" class="tab-content">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Pengaturan Transparansi Layer</h1>
+                        <p class="page-subtitle">Atur transparansi layer GeoJSON Kecamatan dan Kelurahan</p>
+                    </div>
+                </div>
+
+                <div class="settings-container" id="settingsContainer">
+                    <!-- Settings will be loaded here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Form Modal -->
+    <div class="modal-overlay" id="form-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>
+                    <i class="fas fa-plus-circle"></i>
+                    <span id="modal-title">Tambah CCTV Baru</span>
+                </h3>
+                <button class="modal-close" onclick="closeFormModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="cctv-form">
+                    <input type="hidden" id="form-id">
+                    
+                    <div class="form-group">
+                        <label for="form-name">Nama CCTV *</label>
+                        <input type="text" id="form-name" required placeholder="Contoh: CCTV Bundaran Konawe">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="form-description">Deskripsi</label>
+                        <textarea id="form-description" placeholder="Deskripsi lokasi CCTV"></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="form-latitude">Latitude *</label>
+                            <input type="number" id="form-latitude" step="any" required placeholder="-3.853623">
+                        </div>
+                        <div class="form-group">
+                            <label for="form-longitude">Longitude *</label>
+                            <input type="number" id="form-longitude" step="any" required placeholder="122.041614">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Pilih Lokasi di Peta</label>
+                        <div id="map-picker" class="map-picker"></div>
+                        <p class="map-picker-hint">Klik pada peta untuk memilih koordinat</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="form-rtsp">RTSP URL *</label>
+                        <input type="text" id="form-rtsp" required placeholder="rtsp://username:password@ip:port/stream">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="form-location">Alamat Lokasi</label>
+                            <input type="text" id="form-location" placeholder="Jl. Contoh No. 123">
+                        </div>
+                        <div class="form-group">
+                            <label for="form-status">Status</label>
+                            <select id="form-status">
+                                <option value="active">Aktif</option>
+                                <option value="inactive">Tidak Aktif</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeFormModal()">Batal</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            Simpan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirm Modal -->
+    <div class="modal-overlay" id="delete-modal">
+        <div class="modal" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>
+                    <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i>
+                    Konfirmasi Hapus
+                </h3>
+                <button class="modal-close" onclick="closeDeleteModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                    Apakah Anda yakin ingin menghapus CCTV <strong id="delete-cctv-name"></strong>? Tindakan ini tidak dapat dibatalkan.
+                </p>
+                <div class="form-actions" style="margin-top: 0; padding-top: 0; border: none;">
+                    <button class="btn btn-secondary" onclick="closeDeleteModal()">Batal</button>
+                    <button class="btn btn-danger" id="confirm-delete-btn">
+                        <i class="fas fa-trash"></i>
+                        Hapus
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ROI Modal -->
+    <div class="modal-overlay" id="roi-modal">
+        <div class="modal" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3>
+                    <i class="fas fa-crop"></i>
+                    <span id="roi-modal-title">Atur Area Deteksi</span>
+                </h3>
+                <button class="modal-close" onclick="closeRoiModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="video-container" id="roi-video-container" style="background: #000; border-radius: 14px; overflow: hidden; position: relative; aspect-ratio: 16/9; margin-bottom: 1rem;">
+                    <div class="video-placeholder" style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); gap: 16px; text-align: center; padding: 2rem;">
+                        <i class="fas fa-video" style="font-size: 56px; color: var(--accent);"></i>
+                        <p>Menghubungkan ke stream...</p>
+                        <div class="loading-spinner"></div>
+                    </div>
+                </div>
+                <div class="video-controls" style="display: flex; gap: 10px; margin-bottom: 1rem;">
+                    <button id="roi-toggle-btn" class="btn btn-secondary" style="flex: 1;">
+                        <i class="fas fa-crop"></i> Mulai Menggambar Area
+                    </button>
+                    <button id="roi-save-btn" class="btn btn-primary" style="display: none;">
+                        <i class="fas fa-save"></i> Simpan
+                    </button>
+                    <button id="roi-cancel-btn" class="btn btn-secondary" style="display: none;">
+                        <i class="fas fa-times"></i> Batal
+                    </button>
+                    <button id="roi-reset-btn" class="btn btn-danger" style="display: none;">
+                        <i class="fas fa-trash"></i> Hapus
+                    </button>
+                </div>
+                <div style="padding: 1rem; background: var(--bg-card); border-radius: 10px; border: 1px solid var(--border-color);">
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">
+                        <i class="fas fa-info-circle" style="color: var(--accent);"></i>
+                        <strong>Petunjuk:</strong> Klik tombol "Mulai Menggambar Area", lalu drag mouse di video untuk menggambar area deteksi bak sampah. Area yang dipilih akan menjadi fokus untuk AI detection.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        // Configuration
+        const API_URL = '/api/cctv';
+        const AUTH_URL = '/api/auth';
+        const KONAWE_CENTER = [-3.853623, 122.041614];
+
+        // State
+        let cctvData = [];
+        let mapPicker = null;
+        let pickerMarker = null;
+        let deleteTargetId = null;
+        
+        // ROI State
+        let roiWebSocket = null;
+        let roiCanvas = null;
+        let roiCtx = null;
+        let roiMode = false;
+        let currentRoi = null;
+        let isDrawingRoi = false;
+        let roiStartX = 0;
+        let roiStartY = 0;
+        let currentRoiCctvId = null;
+
+        // Check authentication on load
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            
+            // Ensure tabs are visible on load
+            setTimeout(() => {
+                const tabsContainer = document.querySelector('.tabs-container');
+                if (tabsContainer) {
+                    tabsContainer.style.display = 'flex';
+                    tabsContainer.style.visibility = 'visible';
+                    tabsContainer.style.opacity = '1';
+                }
+                
+                const tabButtons = document.querySelectorAll('.tab-btn');
+                tabButtons.forEach(btn => {
+                    btn.style.display = 'flex';
+                    btn.style.visibility = 'visible';
+                    btn.style.opacity = '1';
+                });
+            }, 100);
+        });
+
+        // Check if user is authenticated
+        function checkAuth() {
+            const token = localStorage.getItem('adminToken');
+            if (token) {
+                showDashboard();
+                loadCCTV();
+            }
+        }
+
+        // Login handler
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('btn-login');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+
+            try {
+                const response = await fetch(`${AUTH_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    localStorage.setItem('adminToken', result.token);
+                    localStorage.setItem('adminName', result.user.name || result.user.username);
+                    localStorage.setItem('adminUser', JSON.stringify(result.user));
+                    document.getElementById('admin-name').textContent = result.user.name || result.user.username;
+                    showDashboard();
+                    loadCCTV();
+                } else {
+                    showLoginError(result.error || 'Login gagal');
+                }
+            } catch (error) {
+                showLoginError('Terjadi kesalahan koneksi');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk';
+        });
+
+        function showLoginError(message) {
+            const errorDiv = document.getElementById('login-error');
+            document.getElementById('error-message').textContent = message;
+            errorDiv.classList.add('show');
+            setTimeout(() => errorDiv.classList.remove('show'), 3000);
+        }
+
+        function showDashboard() {
+            document.getElementById('login-container').classList.add('hidden');
+            document.getElementById('dashboard').classList.add('active');
+            document.getElementById('admin-name').textContent = localStorage.getItem('adminName') || 'Admin';
+            
+            // Ensure tabs are visible
+            const tabsContainer = document.querySelector('.tabs-container');
+            if (tabsContainer) {
+                tabsContainer.style.display = 'flex';
+                tabsContainer.style.visibility = 'visible';
+                tabsContainer.style.opacity = '1';
+            }
+            
+            // Show Users button only for admin
+            try {
+                const userData = localStorage.getItem('adminUser');
+                if (userData) {
+                    const user = JSON.parse(userData);
+                    if (user.role === 'admin') {
+                        document.getElementById('btn-users').style.display = 'inline-flex';
+                        document.getElementById('btn-wilayah').style.display = 'inline-flex';
+                        document.getElementById('btn-trash-bins').style.display = 'inline-flex';
+                    }
+                }
+            } catch (e) {}
+        }
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminName');
+            document.getElementById('login-container').classList.remove('hidden');
+            document.getElementById('dashboard').classList.remove('active');
+            document.getElementById('login-form').reset();
+        }
+
+        // Get auth headers
+        function getAuthHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            };
+        }
+
+        // Load CCTV data
+        async function loadCCTV() {
+            try {
+                const response = await fetch(API_URL);
+                const result = await response.json();
+                
+                if (result.success) {
+                    cctvData = result.data;
+                    renderTable();
+                    updateStats();
+                }
+            } catch (error) {
+                console.error('Error loading CCTV:', error);
+                showToast('error', 'Error', 'Gagal memuat data CCTV');
+            }
+        }
+
+        // Update statistics
+        function updateStats() {
+            const total = cctvData.length;
+            const active = cctvData.filter(c => c.status === 'active').length;
+            const inactive = total - active;
+
+            document.getElementById('total-cctv').textContent = total;
+            document.getElementById('active-cctv').textContent = active;
+            document.getElementById('inactive-cctv').textContent = inactive;
+        }
+
+        // Render table
+        function renderTable(filter = '') {
+            const tbody = document.getElementById('cctv-table-body');
+            const filtered = cctvData.filter(cctv => 
+                cctv.name.toLowerCase().includes(filter.toLowerCase()) ||
+                (cctv.location && cctv.location.toLowerCase().includes(filter.toLowerCase()))
+            );
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-state">
+                                <i class="fas fa-video-slash"></i>
+                                <p>Belum ada data CCTV</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(cctv => `
+                <tr>
+                    <td>
+                        <strong>${cctv.name}</strong>
+                        <br><small style="color: var(--text-muted)">${cctv.description || '-'}</small>
+                    </td>
+                    <td>${cctv.location || '-'}</td>
+                    <td>
+                        <small>${cctv.latitude.toFixed(6)}, ${cctv.longitude.toFixed(6)}</small>
+                    </td>
+                    <td>
+                        <span class="status-badge ${cctv.status}">
+                            <span class="dot"></span>
+                            ${cctv.status === 'active' ? 'Aktif' : 'Nonaktif'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="action-btn" onclick="openEditModal('${cctv.id}')" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn" onclick="openRoiModal('${cctv.id}')" title="Atur Area Deteksi" style="color: var(--success);">
+                                <i class="fas fa-crop"></i>
+                            </button>
+                            <button class="action-btn delete" onclick="openDeleteModal('${cctv.id}')" title="Hapus">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Search handler
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            renderTable(e.target.value);
+        });
+
+        // Initialize map picker
+        function initMapPicker() {
+            if (mapPicker) {
+                mapPicker.remove();
+            }
+
+            mapPicker = L.map('map-picker').setView(KONAWE_CENTER, 13);
+            
+            // Google Satellite for map picker
+            L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+                attribution: '&copy; Google',
+                maxZoom: 20
+            }).addTo(mapPicker);
+
+            mapPicker.on('click', (e) => {
+                const { lat, lng } = e.latlng;
+                document.getElementById('form-latitude').value = lat.toFixed(6);
+                document.getElementById('form-longitude').value = lng.toFixed(6);
+
+                if (pickerMarker) {
+                    pickerMarker.setLatLng([lat, lng]);
+                } else {
+                    pickerMarker = L.marker([lat, lng]).addTo(mapPicker);
+                }
+            });
+        }
+
+        // Open add modal
+        function openAddModal() {
+            document.getElementById('modal-title').textContent = 'Tambah CCTV Baru';
+            document.getElementById('form-id').value = '';
+            document.getElementById('cctv-form').reset();
+            document.getElementById('form-modal').classList.add('active');
+            
+            setTimeout(() => {
+                initMapPicker();
+                if (pickerMarker) {
+                    mapPicker.removeLayer(pickerMarker);
+                    pickerMarker = null;
+                }
+            }, 100);
+        }
+
+        // Open edit modal
+        function openEditModal(id) {
+            const cctv = cctvData.find(c => c.id === id);
+            if (!cctv) return;
+
+            document.getElementById('modal-title').textContent = 'Edit CCTV';
+            document.getElementById('form-id').value = cctv.id;
+            document.getElementById('form-name').value = cctv.name;
+            document.getElementById('form-description').value = cctv.description || '';
+            document.getElementById('form-latitude').value = cctv.latitude;
+            document.getElementById('form-longitude').value = cctv.longitude;
+            document.getElementById('form-rtsp').value = cctv.rtsp_url;
+            document.getElementById('form-location').value = cctv.location || '';
+            document.getElementById('form-status').value = cctv.status;
+            
+            document.getElementById('form-modal').classList.add('active');
+            
+            setTimeout(() => {
+                initMapPicker();
+                mapPicker.setView([cctv.latitude, cctv.longitude], 14);
+                if (pickerMarker) {
+                    pickerMarker.setLatLng([cctv.latitude, cctv.longitude]);
+                } else {
+                    pickerMarker = L.marker([cctv.latitude, cctv.longitude]).addTo(mapPicker);
+                }
+            }, 100);
+        }
+
+        // Close form modal
+        function closeFormModal() {
+            document.getElementById('form-modal').classList.remove('active');
+        }
+
+        // Form submit handler
+        document.getElementById('cctv-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const id = document.getElementById('form-id').value;
+            const data = {
+                name: document.getElementById('form-name').value,
+                description: document.getElementById('form-description').value,
+                latitude: parseFloat(document.getElementById('form-latitude').value),
+                longitude: parseFloat(document.getElementById('form-longitude').value),
+                rtsp_url: document.getElementById('form-rtsp').value,
+                location: document.getElementById('form-location').value,
+                status: document.getElementById('form-status').value
+            };
+
+            try {
+                const url = id ? `${API_URL}/${id}` : API_URL;
+                const method = id ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method,
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('success', 'Berhasil', id ? 'CCTV berhasil diperbarui' : 'CCTV berhasil ditambahkan');
+                    closeFormModal();
+                    loadCCTV();
+                } else {
+                    showToast('error', 'Error', result.error);
+                }
+            } catch (error) {
+                showToast('error', 'Error', 'Gagal menyimpan data');
+            }
+        });
+
+        // Open delete modal
+        function openDeleteModal(id) {
+            const cctv = cctvData.find(c => c.id === id);
+            if (!cctv) return;
+
+            deleteTargetId = id;
+            document.getElementById('delete-cctv-name').textContent = cctv.name;
+            document.getElementById('delete-modal').classList.add('active');
+        }
+
+        // Close delete modal
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').classList.remove('active');
+            deleteTargetId = null;
+        }
+
+        // ============ ROI Functions ============
+        
+        // Open ROI modal
+        async function openRoiModal(id) {
+            const cctv = cctvData.find(c => c.id === id);
+            if (!cctv) return;
+
+            currentRoiCctvId = id;
+            document.getElementById('roi-modal-title').textContent = `Atur Area Deteksi - ${cctv.name}`;
+            document.getElementById('roi-modal').classList.add('active');
+
+            // Load ROI settings
+            await loadRoiSettings(id);
+
+            // Start stream
+            startRoiStream(id);
+        }
+
+        // Close ROI modal
+        function closeRoiModal() {
+            document.getElementById('roi-modal').classList.remove('active');
+            if (roiWebSocket) {
+                roiWebSocket.close();
+                roiWebSocket = null;
+            }
+            roiMode = false;
+            currentRoiCctvId = null;
+            const container = document.getElementById('roi-video-container');
+            container.innerHTML = `
+                <div class="video-placeholder" style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); gap: 16px; text-align: center; padding: 2rem;">
+                    <i class="fas fa-video" style="font-size: 56px; color: var(--accent);"></i>
+                    <p>Menghubungkan ke stream...</p>
+                </div>
+            `;
+        }
+
+        // Load ROI settings
+        async function loadRoiSettings(cctvId) {
+            try {
+                const response = await fetch(`/api/roi/${cctvId}`);
+                const result = await response.json();
+                
+                if (result.success && result.data && result.data.roi && result.data.enabled) {
+                    currentRoi = result.data.roi;
+                } else {
+                    currentRoi = null;
+                }
+            } catch (error) {
+                console.error('Error loading ROI:', error);
+                currentRoi = null;
+            }
+        }
+
+        // Start ROI stream
+        function startRoiStream(id) {
+            const container = document.getElementById('roi-video-container');
+            const WS_URL = `ws://${window.location.host}`;
+
+            if (roiWebSocket) {
+                roiWebSocket.close();
+            }
+
+            roiWebSocket = new WebSocket(`${WS_URL}/stream/${id}`);
+            
+            roiWebSocket.onopen = () => {
+                console.log('ROI WebSocket connected');
+            };
+
+            roiWebSocket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                
+                if (data.type === 'frame') {
+                    const img = document.createElement('img');
+                    img.src = `data:image/jpeg;base64,${data.data}`;
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'contain';
+                    
+                    img.onload = function() {
+                        container.innerHTML = '';
+                        container.appendChild(img);
+                        
+                        // Wait a bit for image to render
+                        setTimeout(() => {
+                            // Setup ROI canvas
+                            setupRoiCanvas();
+                            
+                            // Re-setup drawing handlers if in ROI mode
+                            if (roiMode) {
+                                setupRoiDrawing();
+                            }
+                            
+                            // Draw existing ROI if any
+                            if (currentRoi) {
+                                drawRoiBox();
+                            }
+                        }, 200);
+                    };
+                } else if (data.type === 'error') {
+                    container.innerHTML = `
+                        <div class="video-placeholder" style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); gap: 16px; text-align: center; padding: 2rem;">
+                            <i class="fas fa-exclamation-triangle" style="color: var(--danger); font-size: 56px;"></i>
+                            <p>Error: ${data.message}</p>
+                        </div>
+                    `;
+                }
+            };
+
+            roiWebSocket.onerror = () => {
+                container.innerHTML = `
+                    <div class="video-placeholder" style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); gap: 16px; text-align: center; padding: 2rem;">
+                        <i class="fas fa-exclamation-triangle" style="color: var(--danger); font-size: 56px;"></i>
+                        <p>Gagal menghubungkan ke stream</p>
+                    </div>
+                `;
+            };
+        }
+
+        // Setup ROI canvas
+        function setupRoiCanvas() {
+            const container = document.getElementById('roi-video-container');
+            if (!container) {
+                console.error('ROI video container not found');
+                return;
+            }
+
+            // Remove existing ROI canvas
+            const existing = container.querySelector('.roi-canvas');
+            if (existing) {
+                existing.remove();
+                roiCanvas = null;
+                roiCtx = null;
+            }
+
+            // Create ROI canvas
+            roiCanvas = document.createElement('canvas');
+            roiCanvas.className = 'roi-canvas';
+            roiCanvas.style.position = 'absolute';
+            roiCanvas.style.top = '0';
+            roiCanvas.style.left = '0';
+            roiCanvas.style.width = '100%';
+            roiCanvas.style.height = '100%';
+            roiCanvas.style.zIndex = '15';
+            roiCanvas.style.cursor = 'crosshair';
+            roiCanvas.style.pointerEvents = 'auto';
+            roiCanvas.style.background = 'transparent';
+            container.appendChild(roiCanvas);
+            roiCtx = roiCanvas.getContext('2d');
+
+            console.log('ROI canvas created');
+
+            // Resize canvas to match container
+            const resizeCanvas = () => {
+                if (!roiCanvas || !container) return;
+                
+                const rect = container.getBoundingClientRect();
+                roiCanvas.width = rect.width;
+                roiCanvas.height = rect.height;
+                console.log('ROI canvas resized:', roiCanvas.width, roiCanvas.height);
+                
+                // Redraw ROI if exists
+                if (currentRoi) {
+                    drawRoiBox();
+                }
+            };
+
+            // Resize immediately
+            resizeCanvas();
+
+            // Also resize on window resize (but remove old listener first)
+            const resizeHandler = resizeCanvas;
+            window.removeEventListener('resize', resizeHandler);
+            window.addEventListener('resize', resizeHandler);
+        }
+
+        // Draw ROI box
+        function drawRoiBox() {
+            if (!roiCanvas || !roiCtx || !currentRoi) {
+                clearRoiBox();
+                return;
+            }
+
+            const container = document.getElementById('roi-video-container');
+            const img = container.querySelector('img');
+            if (!img) return;
+
+            const imgWidth = img.naturalWidth || img.offsetWidth;
+            const imgHeight = img.naturalHeight || img.offsetHeight;
+            const scaleX = roiCanvas.width / imgWidth;
+            const scaleY = roiCanvas.height / imgHeight;
+
+            roiCtx.clearRect(0, 0, roiCanvas.width, roiCanvas.height);
+
+            const x = currentRoi.x * scaleX;
+            const y = currentRoi.y * scaleY;
+            const width = currentRoi.width * scaleX;
+            const height = currentRoi.height * scaleY;
+
+            // Draw ROI box
+            roiCtx.strokeStyle = '#00ff00';
+            roiCtx.lineWidth = 3;
+            roiCtx.setLineDash([5, 5]);
+            roiCtx.strokeRect(x, y, width, height);
+
+            // Draw fill with transparency
+            roiCtx.fillStyle = 'rgba(0, 255, 0, 0.1)';
+            roiCtx.fillRect(x, y, width, height);
+
+            // Draw label
+            roiCtx.setLineDash([]);
+            roiCtx.fillStyle = '#00ff00';
+            roiCtx.font = 'bold 14px Arial';
+            roiCtx.fillText('Area Deteksi', x + 5, y - 5);
+        }
+
+        // Clear ROI box
+        function clearRoiBox() {
+            if (roiCtx && roiCanvas) {
+                roiCtx.clearRect(0, 0, roiCanvas.width, roiCanvas.height);
+            }
+        }
+
+        // Toggle ROI mode
+        function toggleRoiMode() {
+            roiMode = !roiMode;
+            const container = document.getElementById('roi-video-container');
+            const toggleBtn = document.getElementById('roi-toggle-btn');
+            const saveBtn = document.getElementById('roi-save-btn');
+            const cancelBtn = document.getElementById('roi-cancel-btn');
+            const resetBtn = document.getElementById('roi-reset-btn');
+
+            if (roiMode) {
+                container.classList.add('roi-mode');
+                toggleBtn.innerHTML = '<i class="fas fa-check"></i> Selesai Menggambar';
+                toggleBtn.classList.remove('btn-secondary');
+                toggleBtn.classList.add('btn-success');
+                saveBtn.style.display = 'inline-block';
+                cancelBtn.style.display = 'inline-block';
+                resetBtn.style.display = 'inline-block';
+                
+                // Ensure canvas is created
+                if (!roiCanvas) {
+                    setupRoiCanvas();
+                }
+                
+                // Wait a bit then setup drawing
+                setTimeout(() => {
+                    if (!roiCanvas) {
+                        setupRoiCanvas();
+                    }
+                    setupRoiDrawing();
+                    console.log('ROI mode enabled, ready to draw');
+                }, 200);
+            } else {
+                container.classList.remove('roi-mode');
+                toggleBtn.innerHTML = '<i class="fas fa-crop"></i> Mulai Menggambar Area';
+                toggleBtn.classList.remove('btn-success');
+                toggleBtn.classList.add('btn-secondary');
+                saveBtn.style.display = 'none';
+                cancelBtn.style.display = 'none';
+                resetBtn.style.display = 'none';
+                removeRoiDrawing();
+            }
+        }
+
+        // Setup ROI drawing handlers
+        function setupRoiDrawing() {
+            if (!roiCanvas || !roiCtx) {
+                console.error('ROI canvas not ready');
+                return;
+            }
+
+            console.log('Setting up ROI drawing handlers');
+
+            // Remove existing handlers first
+            roiCanvas.onmousedown = null;
+            roiCanvas.onmousemove = null;
+            roiCanvas.onmouseup = null;
+            roiCanvas.onmouseleave = null;
+
+            roiCanvas.onmousedown = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!roiMode) {
+                    console.log('ROI mode not active');
+                    return;
+                }
+                console.log('Mouse down on ROI canvas');
+                isDrawingRoi = true;
+                const rect = roiCanvas.getBoundingClientRect();
+                roiStartX = e.clientX - rect.left;
+                roiStartY = e.clientY - rect.top;
+                console.log('Start position:', roiStartX, roiStartY);
+            };
+
+            roiCanvas.onmousemove = (e) => {
+                if (!isDrawingRoi || !roiMode) return;
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const rect = roiCanvas.getBoundingClientRect();
+                const currentX = e.clientX - rect.left;
+                const currentY = e.clientY - rect.top;
+
+                const container = document.getElementById('roi-video-container');
+                const img = container.querySelector('img');
+                if (!img) {
+                    console.log('No image found');
+                    return;
+                }
+
+                // Calculate coordinates relative to canvas
+                const x = Math.min(roiStartX, currentX);
+                const y = Math.min(roiStartY, currentY);
+                const width = Math.abs(currentX - roiStartX);
+                const height = Math.abs(currentY - roiStartY);
+
+                // Draw temporary box directly on canvas coordinates
+                roiCtx.clearRect(0, 0, roiCanvas.width, roiCanvas.height);
+                roiCtx.strokeStyle = '#00ff00';
+                roiCtx.lineWidth = 3;
+                roiCtx.setLineDash([5, 5]);
+                roiCtx.strokeRect(x, y, width, height);
+                roiCtx.fillStyle = 'rgba(0, 255, 0, 0.1)';
+                roiCtx.fillRect(x, y, width, height);
+            };
+
+            roiCanvas.onmouseup = (e) => {
+                if (!isDrawingRoi || !roiMode) return;
+                e.preventDefault();
+                e.stopPropagation();
+                isDrawingRoi = false;
+
+                const rect = roiCanvas.getBoundingClientRect();
+                const endX = e.clientX - rect.left;
+                const endY = e.clientY - rect.top;
+
+                const container = document.getElementById('roi-video-container');
+                const img = container.querySelector('img');
+                if (!img) {
+                    console.error('No image found');
+                    return;
+                }
+
+                // Get actual image dimensions
+                const imgWidth = img.naturalWidth || img.offsetWidth || img.clientWidth;
+                const imgHeight = img.naturalHeight || img.offsetHeight || img.clientHeight;
+                
+                // Calculate scale from canvas to image
+                const canvasWidth = roiCanvas.width;
+                const canvasHeight = roiCanvas.height;
+                const scaleX = imgWidth / canvasWidth;
+                const scaleY = imgHeight / canvasHeight;
+
+                // Convert canvas coordinates to image coordinates
+                const x = Math.min(roiStartX, endX) * scaleX;
+                const y = Math.min(roiStartY, endY) * scaleY;
+                const width = Math.abs(endX - roiStartX) * scaleX;
+                const height = Math.abs(endY - roiStartY) * scaleY;
+
+                console.log('ROI drawn:', { x, y, width, height, imgWidth, imgHeight, canvasWidth, canvasHeight });
+
+                if (width > 10 && height > 10) {
+                    currentRoi = { x, y, width, height };
+                    drawRoiBox();
+                    console.log('ROI saved:', currentRoi);
+                } else {
+                    console.log('ROI too small, ignored');
+                    clearRoiBox();
+                }
+            };
+
+            roiCanvas.onmouseleave = (e) => {
+                if (isDrawingRoi) {
+                    isDrawingRoi = false;
+                    if (currentRoi) {
+                        drawRoiBox();
+                    } else {
+                        clearRoiBox();
+                    }
+                }
+            };
+        }
+
+        // Remove ROI drawing handlers
+        function removeRoiDrawing() {
+            if (roiCanvas) {
+                roiCanvas.onmousedown = null;
+                roiCanvas.onmousemove = null;
+                roiCanvas.onmouseup = null;
+                roiCanvas.onmouseleave = null;
+            }
+        }
+
+        // Save ROI settings
+        async function saveRoiSettings() {
+            if (!currentRoiCctvId || !currentRoi) {
+                showToast('error', 'Error', 'Silakan gambar area deteksi terlebih dahulu!');
+                return;
+            }
+
+            // Validate ROI data
+            if (typeof currentRoi.x !== 'number' || typeof currentRoi.y !== 'number' ||
+                typeof currentRoi.width !== 'number' || typeof currentRoi.height !== 'number') {
+                showToast('error', 'Error', 'Format area deteksi tidak valid!');
+                console.error('Invalid ROI format:', currentRoi);
+                return;
+            }
+
+            // Ensure values are numbers (not strings)
+            const roiData = {
+                x: Number(currentRoi.x),
+                y: Number(currentRoi.y),
+                width: Number(currentRoi.width),
+                height: Number(currentRoi.height)
+            };
+
+            console.log('Saving ROI:', { cctvId: currentRoiCctvId, roi: roiData });
+
+            try {
+                const headers = getAuthHeaders();
+                const response = await fetch(`/api/roi/${currentRoiCctvId}`, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({
+                        roi: roiData,
+                        enabled: true
+                    })
+                });
+
+                console.log('Save ROI response status:', response.status);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Save ROI error response:', errorText);
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+
+                const result = await response.json();
+                console.log('Save ROI result:', result);
+
+                if (result.success) {
+                    showToast('success', 'Berhasil', 'Area deteksi berhasil disimpan!');
+                    // Update currentRoi with saved data
+                    currentRoi = roiData;
+                    toggleRoiMode();
+                } else {
+                    showToast('error', 'Error', result.error || 'Gagal menyimpan area deteksi');
+                }
+            } catch (error) {
+                console.error('Error saving ROI:', error);
+                showToast('error', 'Error', 'Gagal menyimpan area deteksi: ' + (error.message || 'Unknown error'));
+            }
+        }
+
+        // Reset ROI
+        async function resetRoiSettings() {
+            if (!currentRoiCctvId) return;
+
+            if (!confirm('Hapus area deteksi? Detection akan menggunakan seluruh frame.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/roi/${currentRoiCctvId}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    currentRoi = null;
+                    clearRoiBox();
+                    toggleRoiMode();
+                    showToast('success', 'Berhasil', 'Area deteksi berhasil dihapus!');
+                } else {
+                    showToast('error', 'Error', result.error);
+                }
+            } catch (error) {
+                console.error('Error resetting ROI:', error);
+                showToast('error', 'Error', 'Gagal menghapus area deteksi');
+            }
+        }
+
+        // Cancel ROI editing
+        function cancelRoiEditing() {
+            toggleRoiMode();
+            loadRoiSettings(currentRoiCctvId);
+        }
+
+        // Setup ROI button handlers
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleBtn = document.getElementById('roi-toggle-btn');
+            const saveBtn = document.getElementById('roi-save-btn');
+            const cancelBtn = document.getElementById('roi-cancel-btn');
+            const resetBtn = document.getElementById('roi-reset-btn');
+
+            if (toggleBtn) toggleBtn.addEventListener('click', toggleRoiMode);
+            if (saveBtn) saveBtn.addEventListener('click', saveRoiSettings);
+            if (cancelBtn) cancelBtn.addEventListener('click', cancelRoiEditing);
+            if (resetBtn) resetBtn.addEventListener('click', resetRoiSettings);
+
+            // Load layer settings when layer settings tab is shown
+            const layerSettingsTab = document.getElementById('tab-layer-settings');
+            if (layerSettingsTab) {
+                const observer = new MutationObserver((mutations) => {
+                    mutations.forEach((mutation) => {
+                        if (mutation.target.classList.contains('active')) {
+                            loadLayerSettings();
+                        }
+                    });
+                });
+                observer.observe(layerSettingsTab, { attributes: true, attributeFilter: ['class'] });
+            }
+        });
+
+        // Switch tab function
+        function switchTab(tabName, buttonElement) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            const selectedTab = document.getElementById(`tab-${tabName}`);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+            }
+            
+            // Activate selected button
+            if (buttonElement) {
+                buttonElement.classList.add('active');
+            }
+            
+            // Load data if needed
+            if (tabName === 'layer-settings') {
+                loadLayerSettings();
+            }
+        }
+
+        // Load layer settings
+        async function loadLayerSettings() {
+            try {
+                const response = await fetch('/api/layer-settings');
+                const result = await response.json();
+
+                if (result.success) {
+                    renderLayerSettings(result.data);
+                } else {
+                    console.error('Failed to load settings:', result.error);
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+        }
+
+        // Render layer settings cards
+        function renderLayerSettings(settings) {
+            const container = document.getElementById('settingsContainer');
+            if (!container) return;
+            
+            container.innerHTML = '';
+
+            const layerTypes = {
+                'kecamatan': {
+                    title: 'Layer Kecamatan',
+                    icon: 'fa-map-marked-alt',
+                    color: 'kecamatan'
+                },
+                'kelurahan': {
+                    title: 'Layer Kelurahan',
+                    icon: 'fa-home',
+                    color: 'kelurahan'
+                }
+            };
+
+            ['kecamatan', 'kelurahan'].forEach(layerType => {
+                const setting = settings.find(s => s.layer_type === layerType) || {
+                    layer_type: layerType,
+                    fill_opacity: layerType === 'kecamatan' ? 0.15 : 0.25,
+                    stroke_opacity: layerType === 'kecamatan' ? 0.9 : 0.85,
+                    enabled: true
+                };
+
+                const layerInfo = layerTypes[layerType];
+
+                const card = document.createElement('div');
+                card.className = 'setting-card';
+                card.innerHTML = `
+                    <div class="alert alert-success" id="alert-${layerType}" style="display: none;">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Pengaturan berhasil disimpan!</span>
+                    </div>
+                    <div class="alert alert-error" id="error-${layerType}" style="display: none;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span id="error-text-${layerType}"></span>
+                    </div>
+                    <div class="setting-header">
+                        <div class="setting-icon ${layerInfo.color}">
+                            <i class="fas ${layerInfo.icon}"></i>
+                        </div>
+                        <div>
+                            <div class="setting-title">${layerInfo.title}</div>
+                            <div class="setting-subtitle">Atur transparansi dan visibilitas layer</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-toggle-on"></i> Aktifkan Layer
+                        </label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="enabled-${layerType}" ${setting.enabled ? 'checked' : ''}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-fill"></i> Transparansi Isian (Fill Opacity)
+                        </label>
+                        <div class="slider-container">
+                            <div class="slider-wrapper">
+                                <input type="range" min="0" max="100" value="${setting.fill_opacity * 100}" 
+                                       class="slider" id="fill-slider-${layerType}" 
+                                       oninput="updateFillOpacity('${layerType}', this.value)">
+                                <span class="slider-value" id="fill-value-display-${layerType}">${(setting.fill_opacity * 100).toFixed(0)}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-pen"></i> Transparansi Garis (Stroke Opacity)
+                        </label>
+                        <div class="slider-container">
+                            <div class="slider-wrapper">
+                                <input type="range" min="0" max="100" value="${setting.stroke_opacity * 100}" 
+                                       class="slider" id="stroke-slider-${layerType}" 
+                                       oninput="updateStrokeOpacity('${layerType}', this.value)">
+                                <span class="slider-value" id="stroke-value-display-${layerType}">${(setting.stroke_opacity * 100).toFixed(0)}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-save" onclick="saveLayerSettings('${layerType}')">
+                        <i class="fas fa-save"></i>
+                        Simpan Pengaturan
+                    </button>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        // Update opacity display
+        function updateFillOpacity(layerType, value) {
+            document.getElementById(`fill-value-display-${layerType}`).textContent = `${parseFloat(value).toFixed(0)}%`;
+        }
+
+        function updateStrokeOpacity(layerType, value) {
+            document.getElementById(`stroke-value-display-${layerType}`).textContent = `${parseFloat(value).toFixed(0)}%`;
+        }
+
+        // Save layer settings
+        async function saveLayerSettings(layerType) {
+            const fillOpacity = parseFloat(document.getElementById(`fill-slider-${layerType}`).value) / 100;
+            const strokeOpacity = parseFloat(document.getElementById(`stroke-slider-${layerType}`).value) / 100;
+            const enabled = document.getElementById(`enabled-${layerType}`).checked;
+
+            const alertSuccess = document.getElementById(`alert-${layerType}`);
+            const alertError = document.getElementById(`error-${layerType}`);
+            const errorText = document.getElementById(`error-text-${layerType}`);
+
+            if (alertSuccess) alertSuccess.style.display = 'none';
+            if (alertError) alertError.style.display = 'none';
+
+            try {
+                const token = localStorage.getItem('adminToken');
+                const response = await fetch(`/api/layer-settings/${layerType}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        fill_opacity: fillOpacity,
+                        stroke_opacity: strokeOpacity,
+                        enabled: enabled
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    if (alertSuccess) {
+                        alertSuccess.style.display = 'flex';
+                        setTimeout(() => {
+                            alertSuccess.style.display = 'none';
+                        }, 3000);
+                    }
+                    showToast('success', 'Berhasil', 'Pengaturan layer berhasil disimpan');
+                } else {
+                    if (errorText) errorText.textContent = result.error || 'Gagal menyimpan pengaturan';
+                    if (alertError) alertError.style.display = 'flex';
+                    showToast('error', 'Error', result.error || 'Gagal menyimpan pengaturan');
+                }
+            } catch (error) {
+                if (errorText) errorText.textContent = 'Terjadi kesalahan. Silakan coba lagi.';
+                if (alertError) alertError.style.display = 'flex';
+                showToast('error', 'Error', 'Terjadi kesalahan. Silakan coba lagi.');
+            }
+        }
+
+        // Confirm delete
+        document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
+            if (!deleteTargetId) return;
+
+            try {
+                const response = await fetch(`${API_URL}/${deleteTargetId}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('success', 'Berhasil', 'CCTV berhasil dihapus');
+                    closeDeleteModal();
+                    loadCCTV();
+                } else {
+                    showToast('error', 'Error', result.error);
+                }
+            } catch (error) {
+                showToast('error', 'Error', 'Gagal menghapus CCTV');
+            }
+        });
+
+        // Show toast notification
+        function showToast(type, title, message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+            `;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeFormModal();
+                closeDeleteModal();
+            }
+        });
+
+        // Close modals on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    closeFormModal();
+                    closeDeleteModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+

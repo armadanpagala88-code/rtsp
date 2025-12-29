@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Bak Sampah - Admin CCTV Kabupaten Konawe</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        :root {
+            --bg-primary: #0c1222;
+            --bg-secondary: #141d2f;
+            --bg-card: #1a2642;
+            --bg-card-hover: #223054;
+            --border-color: #2a3a5c;
+            --accent: #3b82f6;
+            --accent-light: #60a5fa;
+            --accent-glow: rgba(59, 130, 246, 0.25);
+            --success: #22c55e;
+            --warning: #eab308;
+            --danger: #ef4444;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --gold: #fbbf24;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Login Page */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(251, 191, 36, 0.05) 0%, transparent 50%),
+                var(--bg-primary);
+            padding: 2rem;
+        }
+
+        .login-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 3rem;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .login-logo {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--accent) 0%, #1d4ed8 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 8px 30px var(--accent-glow);
+        }
+
+        .login-header h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .login-header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .login-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 1.5rem;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            color: var(--danger);
+            font-size: 0.85rem;
+        }
+
+        .login-error.show {
+            display: flex;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px 12px 48px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--accent) 0%, #1d4ed8 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+            margin-top: 1.5rem;
+        }
+
+        .btn-login:hover {
+            box-shadow: 0 8px 25px var(--accent-glow);
+            transform: translateY(-2px);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--accent-light);
+        }
+
+        /* Dashboard */
+        .dashboard {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .login-container.hidden {
+            display: none;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-logo {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--success) 0%, #16a34a 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+        }
+
+        .header-title h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .header-title span {
+            font-size: 0.75rem;
+            color: var(--gold);
+            font-weight: 500;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .user-info i {
+            color: var(--accent);
+        }
+
+        .user-info span {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 500;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent) 0%, #1d4ed8 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-card);
+            border-color: var(--accent);
+            color: var(--text-primary);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .stat-icon.green {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+        }
+
+        .stat-icon.blue {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--accent);
+        }
+
+        .stat-icon.red {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+        }
+
+        .stat-info h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-info p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Table */
+        .table-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-box {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 14px 10px 40px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--bg-primary);
+        }
+
+        th {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-badge.active {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+        }
+
+        .status-badge.inactive {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+        }
+
+        .status-badge .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: none;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .action-btn:hover {
+            background: var(--bg-card-hover);
+            color: var(--accent);
+        }
+
+        .action-btn.delete:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 2rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-header h3 i {
+            color: var(--success);
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: none;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .form-group select {
+            cursor: pointer;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .map-picker {
+            height: 250px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            margin-top: 8px;
+        }
+
+        .map-picker-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 300px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .toast i {
+            font-size: 1.25rem;
+        }
+
+        .toast.success i {
+            color: var(--success);
+        }
+
+        .toast.error i {
+            color: var(--danger);
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .toast-message {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .table-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Container -->
+    <div class="login-container" id="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <div class="login-logo">
+                    <i class="fas fa-shield-halved"></i>
+                </div>
+                <h1>Admin Login</h1>
+                <p>CCTV Kabupaten Konawe</p>
+            </div>
+
+            <div class="login-error" id="login-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="error-message">Username atau password salah</span>
+            </div>
+
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="username" class="form-input" placeholder="Masukkan username" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" class="form-input" placeholder="Masukkan password" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-login" id="btn-login">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Masuk
+                </button>
+            </form>
+
+            <a href="/" class="back-link">
+                <i class="fas fa-arrow-left"></i> Kembali ke Peta CCTV
+            </a>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard" id="dashboard">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <div class="header-logo">
+                    <i class="fas fa-trash-alt"></i>
+                </div>
+                <div class="header-title">
+                    <h1>Manajemen Bak Sampah</h1>
+                    <span>CCTV Kabupaten Konawe</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <i class="fas fa-user-shield"></i>
+                    <span id="admin-name">Admin</span>
+                </div>
+                <a href="/admin.html" class="btn btn-outline">
+                    <i class="fas fa-video"></i>
+                    CCTV
+                </a>
+                <a href="/admin-users.html" class="btn btn-outline">
+                    <i class="fas fa-users"></i>
+                    Users
+                </a>
+                <a href="/admin-wilayah.html" class="btn btn-outline">
+                    <i class="fas fa-map"></i>
+                    Wilayah
+                </a>
+                <a href="/" class="btn btn-outline">
+                    <i class="fas fa-map"></i>
+                    Lihat Peta
+                </a>
+                <button class="btn btn-secondary" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Manajemen Bak Sampah</h1>
+                    <p class="page-subtitle">Kelola semua lokasi bak sampah di Kabupaten Konawe</p>
+                </div>
+                <button class="btn btn-primary" onclick="openAddModal()">
+                    <i class="fas fa-plus"></i>
+                    Tambah Bak Sampah
+                </button>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon green">
+                        <i class="fas fa-trash-alt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="total-bins">0</h3>
+                        <p>Total Bak Sampah</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon blue">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="active-bins">0</h3>
+                        <p>Bak Sampah Aktif</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="locations-count">0</h3>
+                        <p>Lokasi Terdata</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h2>
+                        <i class="fas fa-list"></i>
+                        Daftar Bak Sampah
+                    </h2>
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="search-input" placeholder="Cari bak sampah...">
+                    </div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Kode</th>
+                            <th>Nama</th>
+                            <th>Kecamatan</th>
+                            <th>Kelurahan</th>
+                            <th>Koordinat</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="trash-bins-table-body">
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-state">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    <p>Memuat data...</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Trash Bin Modal -->
+    <div class="modal-overlay" id="form-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>
+                    <i class="fas fa-trash-alt"></i>
+                    <span id="modal-title">Tambah Bak Sampah Baru</span>
+                </h3>
+                <button class="modal-close" onclick="closeFormModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="trash-bin-form">
+                    <input type="hidden" id="form-id">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="form-kode">Kode Bak Sampah *</label>
+                            <input type="text" id="form-kode" required placeholder="Contoh: BS-001">
+                        </div>
+                        <div class="form-group">
+                            <label for="form-nama">Nama/Lokasi *</label>
+                            <input type="text" id="form-nama" required placeholder="Contoh: Bak Sampah Bundaran Konawe">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="form-kecamatan">Kecamatan</label>
+                            <select id="form-kecamatan">
+                                <option value="">-- Pilih Kecamatan --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="form-kelurahan">Kelurahan</label>
+                            <select id="form-kelurahan">
+                                <option value="">-- Pilih Kelurahan --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="form-latitude">Latitude *</label>
+                            <input type="number" id="form-latitude" step="any" required placeholder="-3.853623">
+                        </div>
+                        <div class="form-group">
+                            <label for="form-longitude">Longitude *</label>
+                            <input type="number" id="form-longitude" step="any" required placeholder="122.041614">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Pilih Lokasi di Peta</label>
+                        <div id="map-picker" class="map-picker"></div>
+                        <p class="map-picker-hint">Klik pada peta untuk memilih koordinat</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-description">Deskripsi</label>
+                        <textarea id="form-description" placeholder="Deskripsi lokasi bak sampah"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-status">Status *</label>
+                        <select id="form-status" required>
+                            <option value="active">Aktif</option>
+                            <option value="inactive">Nonaktif</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeFormModal()">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Trash Bin Modal -->
+    <div class="modal-overlay" id="delete-modal">
+        <div class="modal" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Hapus Bak Sampah
+                </h3>
+                <button class="modal-close" onclick="closeDeleteModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus bak sampah <strong id="delete-bin-name"></strong>?</p>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 8px;">Tindakan ini tidak dapat dibatalkan.</p>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Batal</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">Hapus</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        const API_URL = `${window.location.protocol}//${window.location.host}/api/trash-bins`;
+        const AUTH_URL = `${window.location.protocol}//${window.location.host}/api/auth`;
+        const KECAMATAN_URL = `${window.location.protocol}//${window.location.host}/api/kecamatan`;
+        const KELURAHAN_URL = `${window.location.protocol}//${window.location.host}/api/kelurahan`;
+        
+        const KONAWE_CENTER = [-3.853623, 122.041614];
+        
+        let trashBinsData = [];
+        let kecamatanData = [];
+        let kelurahanData = [];
+        let deleteTargetId = null;
+        let mapPicker = null;
+        let pickerMarker = null;
+
+        // Check if user is authenticated
+        function checkAuth() {
+            const token = localStorage.getItem('adminToken');
+            if (token) {
+                showDashboard();
+                loadKecamatan();
+                loadTrashBins();
+            }
+        }
+
+        // Login handler
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('btn-login');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+
+            try {
+                const response = await fetch(`${AUTH_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    localStorage.setItem('adminToken', result.token);
+                    localStorage.setItem('adminName', result.user.name || result.user.username);
+                    localStorage.setItem('adminUser', JSON.stringify(result.user));
+                    document.getElementById('admin-name').textContent = result.user.name || result.user.username;
+                    showDashboard();
+                    loadKecamatan();
+                    loadTrashBins();
+                } else {
+                    showLoginError(result.error || 'Login gagal');
+                }
+            } catch (error) {
+                showLoginError('Terjadi kesalahan koneksi');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk';
+        });
+
+        function showLoginError(message) {
+            const errorDiv = document.getElementById('login-error');
+            document.getElementById('error-message').textContent = message;
+            errorDiv.classList.add('show');
+            setTimeout(() => errorDiv.classList.remove('show'), 3000);
+        }
+
+        function showDashboard() {
+            document.getElementById('login-container').classList.add('hidden');
+            document.getElementById('dashboard').classList.add('active');
+            document.getElementById('admin-name').textContent = localStorage.getItem('adminName') || 'Admin';
+        }
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminName');
+            localStorage.removeItem('adminUser');
+            document.getElementById('login-container').classList.remove('hidden');
+            document.getElementById('dashboard').classList.remove('active');
+            document.getElementById('login-form').reset();
+        }
+
+        // Get auth headers
+        function getAuthHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            };
+        }
+
+        // Load kecamatan data
+        async function loadKecamatan() {
+            try {
+                const response = await fetch(KECAMATAN_URL);
+                const result = await response.json();
+                
+                if (result.success) {
+                    kecamatanData = result.data;
+                    const select = document.getElementById('form-kecamatan');
+                    select.innerHTML = '<option value="">-- Pilih Kecamatan --</option>' +
+                        result.data.map(k => `<option value="${k.id}">${k.nama}</option>`).join('');
+                    
+                    // Load kelurahan when kecamatan changes
+                    document.getElementById('form-kecamatan').addEventListener('change', async (e) => {
+                        const kecId = e.target.value;
+                        await loadKelurahan(kecId);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading kecamatan:', error);
+            }
+        }
+
+        // Load kelurahan data
+        async function loadKelurahan(kecamatanId) {
+            try {
+                const response = await fetch(KELURAHAN_URL);
+                const result = await response.json();
+                
+                if (result.success) {
+                    kelurahanData = result.data;
+                    const select = document.getElementById('form-kelurahan');
+                    
+                    if (kecamatanId) {
+                        const filtered = result.data.filter(k => k.kecamatan_id === kecamatanId);
+                        select.innerHTML = '<option value="">-- Pilih Kelurahan --</option>' +
+                            filtered.map(k => `<option value="${k.id}">${k.nama}</option>`).join('');
+                    } else {
+                        select.innerHTML = '<option value="">-- Pilih Kelurahan --</option>';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading kelurahan:', error);
+            }
+        }
+
+        // Load trash bins data
+        async function loadTrashBins() {
+            try {
+                const response = await fetch(API_URL);
+                
+                if (response.status === 401) {
+                    logout();
+                    showToast('error', 'Error', 'Session expired. Silakan login kembali.');
+                    return;
+                }
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    trashBinsData = result.data;
+                    renderTable();
+                    updateStats();
+                } else {
+                    showToast('error', 'Error', result.error || 'Gagal memuat data bak sampah');
+                }
+            } catch (error) {
+                console.error('Error loading trash bins:', error);
+                showToast('error', 'Error', 'Gagal memuat data bak sampah');
+            }
+        }
+
+        // Update statistics
+        function updateStats() {
+            const total = trashBinsData.length;
+            const active = trashBinsData.filter(b => b.status === 'active').length;
+            const locations = new Set(trashBinsData.map(b => `${b.kecamatan_nama || ''}-${b.kelurahan_nama || ''}`).filter(l => l !== '-')).size;
+
+            document.getElementById('total-bins').textContent = total;
+            document.getElementById('active-bins').textContent = active;
+            document.getElementById('locations-count').textContent = locations;
+        }
+
+        // Render table
+        function renderTable(filter = '') {
+            const tbody = document.getElementById('trash-bins-table-body');
+            const filtered = trashBinsData.filter(bin => 
+                bin.kode.toLowerCase().includes(filter.toLowerCase()) ||
+                (bin.nama && bin.nama.toLowerCase().includes(filter.toLowerCase())) ||
+                (bin.kecamatan_nama && bin.kecamatan_nama.toLowerCase().includes(filter.toLowerCase())) ||
+                (bin.kelurahan_nama && bin.kelurahan_nama.toLowerCase().includes(filter.toLowerCase()))
+            );
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <i class="fas fa-trash-alt"></i>
+                                <p>Belum ada data bak sampah</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(bin => `
+                <tr>
+                    <td><strong>${bin.kode}</strong></td>
+                    <td>${bin.nama}</td>
+                    <td>${bin.kecamatan_nama || '-'}</td>
+                    <td>${bin.kelurahan_nama || '-'}</td>
+                    <td><small>${bin.latitude.toFixed(6)}, ${bin.longitude.toFixed(6)}</small></td>
+                    <td>
+                        <span class="status-badge ${bin.status}">
+                            <span class="dot"></span>
+                            ${bin.status === 'active' ? 'Aktif' : 'Nonaktif'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="action-btn" onclick="openEditModal('${bin.id}')" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete" onclick="openDeleteModal('${bin.id}')" title="Hapus">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Search handler
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            renderTable(e.target.value);
+        });
+
+        // Initialize map picker
+        function initMapPicker() {
+            if (mapPicker) {
+                mapPicker.remove();
+            }
+
+            mapPicker = L.map('map-picker').setView(KONAWE_CENTER, 13);
+            
+            // Google Satellite for map picker
+            L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+                attribution: '&copy; Google',
+                maxZoom: 20
+            }).addTo(mapPicker);
+
+            mapPicker.on('click', (e) => {
+                const { lat, lng } = e.latlng;
+                document.getElementById('form-latitude').value = lat.toFixed(6);
+                document.getElementById('form-longitude').value = lng.toFixed(6);
+
+                if (pickerMarker) {
+                    pickerMarker.setLatLng([lat, lng]);
+                } else {
+                    pickerMarker = L.marker([lat, lng]).addTo(mapPicker);
+                }
+            });
+        }
+
+        // Open add modal
+        function openAddModal() {
+            document.getElementById('modal-title').textContent = 'Tambah Bak Sampah Baru';
+            document.getElementById('form-id').value = '';
+            document.getElementById('trash-bin-form').reset();
+            document.getElementById('form-modal').classList.add('active');
+            
+            setTimeout(() => {
+                initMapPicker();
+                if (pickerMarker) {
+                    mapPicker.removeLayer(pickerMarker);
+                    pickerMarker = null;
+                }
+            }, 100);
+        }
+
+        // Open edit modal
+        function openEditModal(id) {
+            const bin = trashBinsData.find(b => b.id === id);
+            if (!bin) return;
+
+            document.getElementById('modal-title').textContent = 'Edit Bak Sampah';
+            document.getElementById('form-id').value = bin.id;
+            document.getElementById('form-kode').value = bin.kode;
+            document.getElementById('form-nama').value = bin.nama || '';
+            document.getElementById('form-kecamatan').value = bin.kecamatan_id || '';
+            document.getElementById('form-kelurahan').value = bin.kelurahan_id || '';
+            document.getElementById('form-latitude').value = bin.latitude;
+            document.getElementById('form-longitude').value = bin.longitude;
+            document.getElementById('form-description').value = bin.description || '';
+            document.getElementById('form-status').value = bin.status;
+            
+            // Load kelurahan for selected kecamatan
+            if (bin.kecamatan_id) {
+                loadKelurahan(bin.kecamatan_id).then(() => {
+                    document.getElementById('form-kelurahan').value = bin.kelurahan_id || '';
+                });
+            }
+            
+            document.getElementById('form-modal').classList.add('active');
+            
+            setTimeout(() => {
+                initMapPicker();
+                mapPicker.setView([bin.latitude, bin.longitude], 14);
+                if (pickerMarker) {
+                    pickerMarker.setLatLng([bin.latitude, bin.longitude]);
+                } else {
+                    pickerMarker = L.marker([bin.latitude, bin.longitude]).addTo(mapPicker);
+                }
+            }, 100);
+        }
+
+        // Close form modal
+        function closeFormModal() {
+            document.getElementById('form-modal').classList.remove('active');
+        }
+
+        // Form submit handler
+        document.getElementById('trash-bin-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const id = document.getElementById('form-id').value;
+            const data = {
+                kode: document.getElementById('form-kode').value,
+                nama: document.getElementById('form-nama').value,
+                latitude: parseFloat(document.getElementById('form-latitude').value),
+                longitude: parseFloat(document.getElementById('form-longitude').value),
+                kecamatan_id: document.getElementById('form-kecamatan').value || null,
+                kelurahan_id: document.getElementById('form-kelurahan').value || null,
+                description: document.getElementById('form-description').value,
+                status: document.getElementById('form-status').value
+            };
+
+            try {
+                const url = id ? `${API_URL}/${id}` : API_URL;
+                const method = id ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method,
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(data)
+                });
+
+                if (response.status === 401) {
+                    logout();
+                    showToast('error', 'Error', 'Session expired. Silakan login kembali.');
+                    return;
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('success', 'Berhasil', id ? 'Bak sampah berhasil diperbarui' : 'Bak sampah berhasil ditambahkan');
+                    closeFormModal();
+                    loadTrashBins();
+                } else {
+                    showToast('error', 'Error', result.error);
+                }
+            } catch (error) {
+                showToast('error', 'Error', 'Gagal menyimpan data');
+            }
+        });
+
+        // Open delete modal
+        function openDeleteModal(id) {
+            const bin = trashBinsData.find(b => b.id === id);
+            if (!bin) return;
+
+            deleteTargetId = id;
+            document.getElementById('delete-bin-name').textContent = bin.nama || bin.kode;
+            document.getElementById('delete-modal').classList.add('active');
+        }
+
+        // Close delete modal
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').classList.remove('active');
+            deleteTargetId = null;
+        }
+
+        // Confirm delete
+        async function confirmDelete() {
+            if (!deleteTargetId) return;
+
+            try {
+                const response = await fetch(`${API_URL}/${deleteTargetId}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+
+                if (response.status === 401) {
+                    logout();
+                    showToast('error', 'Error', 'Session expired. Silakan login kembali.');
+                    return;
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('success', 'Berhasil', 'Bak sampah berhasil dihapus');
+                    closeDeleteModal();
+                    loadTrashBins();
+                } else {
+                    showToast('error', 'Error', result.error);
+                }
+            } catch (error) {
+                showToast('error', 'Error', 'Gagal menghapus bak sampah');
+            }
+        }
+
+        // Toast notification
+        function showToast(type, title, message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+            `;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Initialize
+        checkAuth();
+    </script>
+</body>
+</html>
+

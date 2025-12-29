@@ -1,0 +1,4340 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCTV Kabupaten Konawe</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+
+    <style>
+        :root {
+            --bg-primary: #0c1222;
+            --bg-secondary: #141d2f;
+            --bg-card: #1a2642;
+            --bg-card-hover: #223054;
+            --border-color: #2a3a5c;
+            --accent: #3b82f6;
+            --accent-light: #60a5fa;
+            --accent-glow: rgba(59, 130, 246, 0.25);
+            --success: #22c55e;
+            --warning: #eab308;
+            --danger: #ef4444;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --gold: #fbbf24;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+            z-index: 1000;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), var(--gold), var(--accent), transparent);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo-icon {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, var(--accent) 0%, #1d4ed8 100%);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 20px var(--accent-glow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo-icon::before {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 50%);
+            border-radius: 12px;
+        }
+
+        .logo-text h1 {
+            font-size: 1.35rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text span {
+            font-size: 0.7rem;
+            color: var(--gold);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        .btn-admin {
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-admin:hover {
+            background: var(--bg-card);
+            border-color: var(--accent);
+            color: var(--text-primary);
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 72px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 360px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+        }
+
+        .sidebar-header h2 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-header h2 i {
+            color: var(--accent);
+        }
+
+        .badge {
+            background: linear-gradient(135deg, var(--accent) 0%, #1d4ed8 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .search-box {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .cctv-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.75rem;
+        }
+
+        .cctv-list::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .cctv-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .cctv-list::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        .cctv-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cctv-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--accent);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .cctv-card:hover {
+            border-color: var(--accent);
+            background: var(--bg-card-hover);
+            transform: translateX(4px);
+        }
+
+        .cctv-card:hover::before {
+            transform: scaleY(1);
+        }
+
+        .cctv-card.active {
+            border-color: var(--accent);
+            background: rgba(59, 130, 246, 0.08);
+        }
+
+        .cctv-card.active::before {
+            transform: scaleY(1);
+        }
+
+        .cctv-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .cctv-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            line-height: 1.3;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.active {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+        }
+
+        .status-badge.inactive {
+            background: rgba(100, 116, 139, 0.15);
+            color: var(--text-muted);
+        }
+
+        .status-badge .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .cctv-location {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .cctv-location i {
+            color: var(--accent);
+            font-size: 0.75rem;
+        }
+
+        .btn-watch {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, var(--accent) 0%, #1d4ed8 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-watch:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--accent-glow);
+        }
+
+        .btn-watch:disabled {
+            background: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Map Container */
+        .map-container {
+            flex: 1;
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            background: var(--bg-primary);
+        }
+
+        /* Custom Markers */
+        .custom-marker {
+            background: none;
+            border: none;
+        }
+
+        /* CCTV Marker Icon - Direct PNG without pin */
+        .cctv-marker-icon {
+            background: none !important;
+            border: none !important;
+        }
+
+        .cctv-marker-icon img {
+            width: 40px !important;
+            height: 40px !important;
+            object-fit: contain !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        .marker-icon {
+            width: 44px;
+            height: 54px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        .marker-icon .pin {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--accent) 0%, #1d4ed8 100%);
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid white;
+        }
+
+        .marker-icon .pin i {
+            transform: rotate(45deg);
+            color: white;
+            font-size: 18px;
+        }
+
+        .marker-icon .pin {
+            position: relative !important;
+            overflow: visible !important;
+        }
+
+        .marker-icon .pin {
+            position: relative !important;
+            width: 44px !important;
+            height: 44px !important;
+            overflow: visible !important;
+        }
+
+        .marker-icon .pin .cctv-icon-bg {
+            width: 28px !important;
+            height: 28px !important;
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) rotate(45deg) !important;
+            background-size: contain !important;
+            background-repeat: no-repeat !important;
+            background-position: center !important;
+            filter: brightness(0) invert(1) !important;
+            pointer-events: none !important;
+            z-index: 10 !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        .marker-icon .pin .cctv-icon-img {
+            width: 28px !important;
+            height: 28px !important;
+            transform: rotate(45deg) !important;
+            filter: brightness(0) invert(1) !important;
+            object-fit: contain !important;
+            display: block !important;
+            pointer-events: none !important;
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            margin-top: -14px !important;
+            margin-left: -14px !important;
+            z-index: 10 !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        .marker-icon.inactive .pin {
+            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+        }
+
+        /* Video Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.3);
+            /* backdrop-filter removed - no blur, let map be visible */
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 75vh;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 0.875rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+        }
+
+        .modal-header h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-header h3 i {
+            color: var(--accent);
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .modal-close:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .modal-body {
+            padding: 1rem;
+        }
+
+        .video-container {
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            aspect-ratio: 16/9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .video-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .video-container canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .video-container canvas.roi-canvas {
+            pointer-events: none;
+            /* Disabled by default, only active in ROI mode */
+            cursor: default;
+            z-index: 12 !important;
+            /* Below detection canvas (z-index 10) but above image */
+            background: transparent;
+        }
+
+        .video-container.roi-mode canvas.roi-canvas {
+            pointer-events: auto !important;
+            cursor: crosshair !important;
+        }
+
+        .video-container.roi-mode {
+            cursor: crosshair;
+        }
+
+        .video-container.roi-mode img {
+            pointer-events: none;
+        }
+
+        .video-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .video-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            gap: 16px;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .video-placeholder i {
+            font-size: 56px;
+            color: var(--accent);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.05);
+                opacity: 0.7;
+            }
+        }
+
+        .video-placeholder p {
+            font-size: 0.95rem;
+        }
+
+        .loading-spinner {
+            width: 44px;
+            height: 44px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .video-info {
+            margin-top: 4px;
+            /* Reduced from 0.875rem */
+            padding: 0.875rem;
+            background: var(--bg-card);
+            border-radius: 12px;
+            display: flex;
+            gap: 15px;
+            border: 1px solid var(--border-color);
+            align-items: stretch;
+        }
+
+        .info-col-left {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.875rem;
+        }
+
+        .video-info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .video-info-item label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .video-info-item span {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* Leaflet Popup Override */
+        .leaflet-popup-content-wrapper {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            color: var(--text-primary);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .leaflet-popup-tip {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+        }
+
+        .leaflet-popup-close-button {
+            color: var(--text-secondary) !important;
+            font-size: 20px !important;
+            padding: 8px !important;
+        }
+
+        .popup-content {
+            padding: 10px;
+            min-width: 200px;
+        }
+
+        .popup-content h4 {
+            margin: 0 0 10px 0;
+            color: var(--accent-light);
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .popup-content p {
+            margin: 6px 0;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .popup-content p i {
+            color: var(--accent);
+            width: 16px;
+            font-size: 0.8rem;
+        }
+
+        .popup-btn {
+            margin-top: 14px;
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, var(--accent) 0%, #1d4ed8 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .popup-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        /* Info Control */
+        .map-info {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .map-info h4 {
+            font-size: 0.85rem;
+            color: var(--accent-light);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .map-info p {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        /* Layer Control Styling */
+        .leaflet-control-layers {
+            background: var(--bg-card) !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: 12px !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+            padding: 0 !important;
+            overflow: hidden;
+        }
+
+        .leaflet-control-layers-toggle {
+            background-color: var(--bg-card) !important;
+            width: 40px !important;
+            height: 40px !important;
+            background-size: 22px 22px !important;
+            border-radius: 10px !important;
+        }
+
+        .leaflet-control-layers-expanded {
+            padding: 10px 14px !important;
+            min-width: 180px;
+        }
+
+        .leaflet-control-layers-base label,
+        .leaflet-control-layers-overlays label {
+            color: var(--text-primary) !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            font-size: 0.85rem !important;
+            padding: 6px 8px !important;
+            margin: 2px 0 !important;
+            border-radius: 8px !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            cursor: pointer !important;
+            transition: background 0.2s ease !important;
+        }
+
+        .leaflet-control-layers-base label:hover,
+        .leaflet-control-layers-overlays label:hover {
+            background: var(--bg-card-hover) !important;
+        }
+
+        .leaflet-control-layers-selector {
+            accent-color: var(--accent) !important;
+            width: 16px !important;
+            height: 16px !important;
+            margin-right: 8px !important;
+        }
+
+        .leaflet-control-layers-separator {
+            border-top: 1px solid var(--border-color) !important;
+            margin: 8px 0 !important;
+        }
+
+        /* Custom Tooltip */
+        .custom-tooltip {
+            background: var(--bg-card) !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: 10px !important;
+            padding: 10px 14px !important;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4) !important;
+            color: var(--text-primary) !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            font-size: 0.85rem !important;
+        }
+
+        .custom-tooltip::before {
+            border-top-color: var(--bg-card) !important;
+        }
+
+        .leaflet-tooltip-top:before {
+            border-top-color: var(--border-color) !important;
+        }
+
+        /* Marker hover effect */
+        .marker-icon {
+            cursor: pointer !important;
+            transition: transform 0.2s ease !important;
+        }
+
+        .marker-icon:hover {
+            transform: scale(1.15) !important;
+        }
+
+        .marker-icon:hover .pin {
+            box-shadow: 0 6px 25px var(--accent-glow) !important;
+        }
+
+        /* Legend Panel */
+        .legend-panel {
+            position: absolute;
+            bottom: 30px;
+            right: 10px;
+            z-index: 1000;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
+            width: 280px;
+            max-height: calc(100vh - 200px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .legend-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .legend-header:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .legend-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .legend-title i {
+            color: var(--accent);
+        }
+
+        .legend-toggle-icon {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            transition: transform 0.3s ease;
+        }
+
+        .legend-panel.collapsed .legend-toggle-icon {
+            transform: rotate(-90deg);
+        }
+
+        .legend-panel.collapsed .legend-content {
+            display: none;
+        }
+
+        .legend-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .legend-content::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .legend-content::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        .legend-section {
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .legend-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .legend-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-section-title i {
+            color: var(--accent);
+        }
+
+        .legend-count {
+            background: var(--accent);
+            color: white;
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: auto;
+        }
+
+        /* Legend Action Buttons */
+        .legend-actions {
+            display: flex;
+            gap: 6px;
+            padding: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .btn-show-all,
+        .btn-hide-all {
+            flex: 1;
+            padding: 10px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-show-all:hover {
+            border-color: var(--success);
+            color: var(--success);
+            background: rgba(34, 197, 94, 0.1);
+        }
+
+        .btn-show-all.active {
+            border-color: var(--success);
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-hide-all:hover {
+            border-color: var(--text-muted);
+            color: var(--text-primary);
+        }
+
+        /* Hierarchy List */
+        .hierarchy-list {
+            max-height: 350px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .hierarchy-list::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .hierarchy-list::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        /* Kecamatan Group */
+        .kec-group {
+            margin-bottom: 4px;
+        }
+
+        .kec-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .kec-header:hover {
+            border-color: var(--accent);
+            background: var(--bg-card-hover);
+        }
+
+        .kec-header.selected {
+            border-color: var(--accent);
+            background: rgba(59, 130, 246, 0.15);
+        }
+
+        .kec-header.selected .kec-name {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .kec-expand {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: transform 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .kec-group.expanded .kec-expand {
+            transform: rotate(90deg);
+        }
+
+        .kec-radio {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+
+        .kec-header.selected .kec-radio {
+            border-color: var(--accent);
+        }
+
+        .kec-header.selected .kec-radio::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .kec-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+
+        .kec-name {
+            flex: 1;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .kec-badge {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            background: var(--bg-card);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Kelurahan List */
+        .kel-list {
+            display: none;
+            padding-left: 20px;
+            margin-top: 4px;
+        }
+
+        .kec-group.expanded .kel-list {
+            display: block;
+        }
+
+        .kel-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            margin-bottom: 2px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-left: 2px solid var(--border-color);
+        }
+
+        .kel-item:hover {
+            background: var(--bg-card-hover);
+            border-left-color: var(--accent);
+        }
+
+        .kel-item.selected {
+            background: rgba(34, 197, 94, 0.1);
+            border-left-color: var(--success);
+        }
+
+        .kel-item.selected .kel-name {
+            color: var(--success);
+            font-weight: 500;
+        }
+
+        .kel-radio {
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+
+        .kel-item.selected .kel-radio {
+            border-color: var(--success);
+        }
+
+        .kel-item.selected .kel-radio::after {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--success);
+            border-radius: 50%;
+        }
+
+        .kel-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .kel-name {
+            flex: 1;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .kel-type {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            background: var(--bg-primary);
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        /* AI Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #334155;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+        }
+
+        input:checked+.slider {
+            background-color: var(--accent);
+        }
+
+        input:focus+.slider {
+            box-shadow: 0 0 1px var(--accent);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+        }
+
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        @media (max-width: 768px) {
+            .legend-panel {
+                width: 250px;
+                max-height: 300px;
+            }
+        }
+
+        /* Kecamatan Label */
+        .kecamatan-label {
+            background: rgba(26, 38, 66, 0.95) !important;
+            border: 1px solid var(--gold) !important;
+            border-radius: 6px !important;
+            padding: 4px 10px !important;
+            color: var(--gold) !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            font-size: 0.8rem !important;
+            font-weight: 700 !important;
+            white-space: nowrap !important;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4) !important;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .kecamatan-label::before {
+            display: none !important;
+        }
+
+        /* Kelurahan/Desa Label */
+        .kelurahan-label {
+            background: rgba(26, 38, 66, 0.9) !important;
+            border: 1px solid #22c55e !important;
+            border-radius: 4px !important;
+            padding: 3px 6px !important;
+            color: #22c55e !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            font-size: 0.65rem !important;
+            font-weight: 600 !important;
+            white-space: nowrap !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        .kelurahan-label::before {
+            display: none !important;
+        }
+
+        /* Sidebar Toggle Button */
+        .sidebar-toggle {
+            position: absolute;
+            right: -18px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent) 0%, #1d4ed8 100%);
+            border: 3px solid var(--bg-primary);
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            z-index: 100;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .sidebar-toggle:hover {
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 6px 25px var(--accent-glow);
+        }
+
+        .sidebar-toggle i {
+            transition: transform 0.3s ease;
+        }
+
+        /* Sidebar Collapsed State */
+        .sidebar {
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar.collapsed {
+            width: 0;
+            min-width: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .sidebar.collapsed .sidebar-header,
+        .sidebar.collapsed .search-box,
+        .sidebar.collapsed .cctv-list {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .sidebar.collapsed .sidebar-toggle {
+            right: -50px;
+        }
+
+        .sidebar.collapsed .sidebar-toggle i {
+            transform: rotate(180deg);
+        }
+
+        /* Map expands when sidebar collapsed */
+        .map-container {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Floating toggle when sidebar is collapsed */
+        .floating-toggle {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--accent) 0%, #1d4ed8 100%);
+            border: none;
+            border-radius: 14px;
+            color: white;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            z-index: 1000;
+            box-shadow: 0 8px 30px var(--accent-glow);
+            transition: all 0.3s ease;
+        }
+
+        .floating-toggle:hover {
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 10px 40px var(--accent-glow);
+        }
+
+        .floating-toggle.show {
+            display: flex;
+            animation: slideInLeft 0.3s ease;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateY(-50%) translateX(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(-50%) translateX(0);
+            }
+        }
+
+        .floating-toggle .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 22px;
+            height: 22px;
+            background: var(--danger);
+            border-radius: 50%;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: 45%;
+            }
+
+            .sidebar.collapsed {
+                height: 0;
+            }
+
+            .sidebar-toggle {
+                right: 50%;
+                transform: translateX(50%);
+                top: auto;
+                bottom: -18px;
+            }
+
+            .sidebar.collapsed .sidebar-toggle {
+                bottom: -50px;
+                right: 50%;
+            }
+
+            .sidebar.collapsed .sidebar-toggle i {
+                transform: rotate(90deg);
+            }
+
+            .sidebar-toggle i {
+                transform: rotate(-90deg);
+            }
+
+            .floating-toggle {
+                left: 50%;
+                top: auto;
+                bottom: 20px;
+                transform: translateX(-50%);
+            }
+
+            .floating-toggle:hover {
+                transform: translateX(-50%) scale(1.05);
+            }
+
+            .floating-toggle.show {
+                animation: slideInUp 0.3s ease;
+            }
+
+            @keyframes slideInUp {
+                from {
+                    opacity: 0;
+                    transform: translateX(-50%) translateY(30px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateX(-50%) translateY(0);
+                }
+            }
+
+            .map-container {
+                height: 55%;
+            }
+
+            .header {
+                padding: 0.5rem 1rem;
+            }
+
+            .logo-text h1 {
+                font-size: 1.1rem;
+            }
+
+            .btn-admin span {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-video"></i>
+            </div>
+            <div class="logo-text">
+                <h1>CCTV Kabupaten Konawe</h1>
+                <span>Sistem Monitoring Tempat Sampah</span>
+            </div>
+        </div>
+        <div class="header-actions">
+            <div class="live-indicator">
+                <span class="live-dot"></span>
+                LIVE
+            </div>
+            <a href="/admin.html" class="btn-admin">
+                <i class="fas fa-lock"></i>
+                <span>Admin</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <aside class="sidebar collapsed" id="sidebar">
+            <!-- Toggle Button -->
+            <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()" title="Tampilkan Panel">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+
+            <div class="sidebar-header">
+                <h2>
+                    <i class="fas fa-camera"></i>
+                    Daftar CCTV
+                </h2>
+                <span class="badge" id="cctv-count">0</span>
+            </div>
+            <div class="search-box">
+                <div class="search-wrapper">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="search-input" id="search-input" placeholder="Cari lokasi CCTV...">
+                </div>
+            </div>
+            <div class="cctv-list" id="cctv-list">
+                <!-- CCTV cards will be inserted here -->
+            </div>
+        </aside>
+
+        <!-- Floating Toggle Button (when sidebar hidden) -->
+        <button class="floating-toggle show" id="floating-toggle" onclick="toggleSidebar()"
+            title="Tampilkan Daftar CCTV">
+            <i class="fas fa-list"></i>
+            <span class="badge" id="floating-count">0</span>
+        </button>
+
+        <!-- Map Container -->
+        <div class="map-container">
+            <div id="map"></div>
+
+            <!-- Layer Controls / Legend Panel -->
+            <div class="legend-panel" id="legend-panel">
+                <div class="legend-header" onclick="toggleLegendPanel()">
+                    <div class="legend-title">
+                        <i class="fas fa-layer-group"></i>
+                        <span>Legenda Batas Wilayah</span>
+                    </div>
+                    <i class="fas fa-chevron-down legend-toggle-icon"></i>
+                </div>
+
+                <div class="legend-content">
+                    <!-- Action Buttons -->
+                    <div class="legend-actions">
+                        <button class="btn-show-all active" id="btn-show-all" onclick="showAllLayers()">
+                            <i class="fas fa-globe"></i> Tampilkan Semua
+                        </button>
+                        <button class="btn-hide-all" onclick="hideAllLayers()">
+                            <i class="fas fa-eye-slash"></i> Sembunyikan
+                        </button>
+                    </div>
+
+                    <!-- Hierarchical Radio List -->
+                    <div class="legend-section">
+                        <div class="legend-section-title">
+                            <i class="fas fa-sitemap"></i> Pilih Wilayah
+                        </div>
+                        <div class="hierarchy-list" id="hierarchy-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Trash Bins Section -->
+                    <div class="legend-section">
+                        <div class="legend-section-title">
+                            <i class="fas fa-trash-alt"></i> Bak Sampah
+                            <span class="legend-count" id="trash-bin-count">0</span>
+                        </div>
+                        <div style="padding: 8px;">
+                            <button class="btn-show-all" id="toggle-trash-bins" onclick="toggleTrashBins()"
+                                style="width: 100%;">
+                                <i class="fas fa-eye"></i>
+                                <span id="trash-bin-toggle-text">Tampilkan</span> Bak Sampah
+                            </button>
+                            <p
+                                style="margin-top: 8px; font-size: 0.7rem; color: var(--text-muted); text-align: center;">
+                                <i class="fas fa-info-circle"></i> Klik marker untuk melihat detail lokasi
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Modal -->
+    <div class="modal-overlay" id="video-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>
+                    <i class="fas fa-video"></i>
+                    <span id="video-modal-title">Live Stream CCTV</span>
+                </h3>
+                <button class="modal-close" onclick="closeVideoModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="video-container" id="video-container">
+                    <div class="video-placeholder">
+                        <i class="fas fa-video"></i>
+                        <p>Menghubungkan ke stream...</p>
+                        <div class="loading-spinner"></div>
+                    </div>
+                </div>
+                <div class="video-info" id="video-info">
+                    <div class="info-col-left">
+                        <div class="video-info-item">
+                            <label>Lokasi</label>
+                            <span id="info-location">-</span>
+                        </div>
+                        <div class="video-info-item">
+                            <label>Status</label>
+                            <span id="info-status">-</span>
+                        </div>
+                        <div class="video-info-item">
+                            <label>Koordinat</label>
+                            <span id="info-coords">-</span>
+                        </div>
+                        <div class="video-info-item">
+                            <label>Deskripsi</label>
+                            <span id="info-desc">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        onerror="console.error('Failed to load Leaflet library'); document.body.innerHTML='<div style=\'display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#0c1222;color:#f8fafc;padding:2rem;text-align:center;\'><h1 style=\'color:#ef4444;margin-bottom:1rem;\'>⚠️ Library Tidak Dimuat</h1><p style=\'color:#94a3b8;\'>Gagal memuat library Leaflet. Pastikan koneksi internet aktif.</p><button onclick=\'location.reload()\' style=\'padding:0.75rem 1.5rem;background:#3b82f6;color:white;border:none;border-radius:8px;cursor:pointer;margin-top:1rem;\'>Muat Ulang</button></div>';">
+        </script>
+
+    <script>
+        // Wait for Leaflet to load
+        if (typeof L === 'undefined') {
+            console.error('Leaflet library not loaded');
+        }
+
+        // Configuration - Konawe Coordinates
+        const API_URL = '/api/cctv';
+        // Support both HTTP (ws://) and HTTPS (wss://)
+        const WS_PROTOCOL = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const WS_URL = `${WS_PROTOCOL}//${window.location.host}`;
+        const KONAWE_CENTER = [-3.853623, 122.041614];
+
+        // State
+        let map;
+        let markers = {};
+        let trashBinMarkers = {};
+        let cctvData = [];
+        let trashBinsData = [];
+        let activeWebSocket = null;
+        let selectedCctvId = null;
+        let currentDetections = [];
+        let detectionCanvas = null;
+        let detectionCtx = null;
+        let roiCanvas = null;
+        let roiCtx = null;
+        let roiMode = false;
+        let currentRoi = null;
+        let isDrawingRoi = false;
+        let roiStartX = 0;
+        let roiStartY = 0;
+        let currentCctvId = null;
+        let kecamatanLayer = null;
+        let kecamatanLabels = [];
+        let kecamatanData = null;
+        let kelurahanLayer = null;
+        let kelurahanLabels = [];
+        let kelurahanData = null;
+        let showTrashBins = true;
+
+        // Store kelurahan layer map for quick lookup
+        const kelurahanLayerMap = new Map();
+
+        // Color palettes for random colors
+        const kecamatanColors = [
+            '#f59e0b', '#ef4444', '#ec4899', '#8b5cf6', '#6366f1',
+            '#3b82f6', '#0ea5e9', '#14b8a6', '#22c55e', '#84cc16',
+            '#eab308', '#f97316', '#e11d48', '#a855f7', '#7c3aed'
+        ];
+
+        const kelurahanColors = [
+            '#60a5fa', '#34d399', '#a78bfa', '#f472b6', '#fbbf24',
+            '#fb7185', '#4ade80', '#c084fc', '#38bdf8', '#a3e635',
+            '#facc15', '#fb923c', '#f87171', '#818cf8', '#2dd4bf'
+        ];
+
+        // Store assigned colors
+        const kecamatanColorMap = {};
+        const kelurahanColorMap = {};
+        let kecColorIndex = 0;
+        let kelColorIndex = 0;
+
+        // Get color for kecamatan (consistent per kd_kecamatan)
+        function getKecamatanColor(kd) {
+            if (!kecamatanColorMap[kd]) {
+                kecamatanColorMap[kd] = kecamatanColors[kecColorIndex % kecamatanColors.length];
+                kecColorIndex++;
+            }
+            return kecamatanColorMap[kd];
+        }
+
+        // Get color for kelurahan (consistent per kd_kelurahan)
+        function getKelurahanColor(kd) {
+            if (!kelurahanColorMap[kd]) {
+                kelurahanColorMap[kd] = kelurahanColors[kelColorIndex % kelurahanColors.length];
+                kelColorIndex++;
+            }
+            return kelurahanColorMap[kd];
+        }
+
+        // Initialize map centered on Konawe
+        function initMap() {
+            try {
+                // Check if Leaflet is loaded
+                if (typeof L === 'undefined') {
+                    throw new Error('Leaflet library tidak dimuat. Pastikan koneksi internet aktif.');
+                }
+
+                // Check if map container exists
+                const mapContainer = document.getElementById('map');
+                if (!mapContainer) {
+                    throw new Error('Container peta tidak ditemukan.');
+                }
+
+                map = L.map('map', {
+                    zoomControl: false
+                }).setView(KONAWE_CENTER, 14);
+
+                // Zoom control
+                L.control.zoom({
+                    position: 'bottomright'
+                }).addTo(map);
+
+                // Base layers
+                const googleStreets = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+                    attribution: '&copy; Google',
+                    maxZoom: 20
+                });
+
+                const googleSatellite = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+                    attribution: '&copy; Google',
+                    maxZoom: 20
+                });
+
+                const googleHybrid = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+                    attribution: '&copy; Google',
+                    maxZoom: 20
+                });
+
+                const esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                    attribution: '&copy; Esri, Maxar, Earthstar Geographics',
+                    maxZoom: 19
+                });
+
+                const osmStreet = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors',
+                    maxZoom: 19
+                });
+
+                // Dark Map Layer
+                const darkMap = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                    subdomains: 'abcd',
+                    maxZoom: 20
+                });
+
+                // Add default layer (Google Satellite)
+                googleSatellite.addTo(map);
+
+                // Layer control
+                const baseLayers = {
+                    "🚗 Google Streets": googleStreets,
+                    "🌙 Dark Map": darkMap,
+                    "🛰️ Google Satellite": googleSatellite,
+                    "🗺️ Google Hybrid": googleHybrid,
+                    "🌍 ESRI Satellite": esriSatellite,
+                    "🛣️ OpenStreetMap": osmStreet
+                };
+
+                L.control.layers(baseLayers, null, {
+                    position: 'topright',
+                    collapsed: true
+                }).addTo(map);
+
+                // Info control
+                const info = L.control({ position: 'topleft' });
+                info.onAdd = function () {
+                    const div = L.DomUtil.create('div', 'map-info');
+                    div.innerHTML = `
+                    <h4><i class="fas fa-map-marker-alt"></i> Kabupaten Konawe</h4>
+                    <p>Klik marker untuk melihat stream CCTV</p>
+                `;
+                    return div;
+                };
+                info.addTo(map);
+
+                // Load layer settings and boundary layers (sequential to ensure data is ready)
+                (async () => {
+                    try {
+                        await loadLayerSettings();
+                        await loadKecamatanLayer();
+                        await loadKelurahanLayer();
+                        // Ensure legend is populated after both loaded
+                        setTimeout(() => {
+                            if (kecamatanData && kelurahanData) {
+                                populateLegendLists();
+                            }
+                        }, 200);
+                    } catch (error) {
+                        console.error('Error loading layers:', error);
+                    }
+                })();
+            } catch (error) {
+                console.error('Error initializing map:', error);
+                throw error; // Re-throw to be caught by global handler
+            }
+        }
+
+        // Layer settings storage
+        let layerSettings = {
+            kecamatan: { fill_opacity: 0.15, stroke_opacity: 0.9, enabled: true },
+            kelurahan: { fill_opacity: 0.25, stroke_opacity: 0.85, enabled: true }
+        };
+
+        // Load layer settings from API
+        async function loadLayerSettings() {
+            try {
+                const response = await fetch('/api/layer-settings');
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    result.data.forEach(setting => {
+                        layerSettings[setting.layer_type] = {
+                            fill_opacity: setting.fill_opacity,
+                            stroke_opacity: setting.stroke_opacity,
+                            enabled: setting.enabled
+                        };
+                    });
+                    console.log('Layer settings loaded:', layerSettings);
+                }
+            } catch (error) {
+                console.error('Error loading layer settings:', error);
+                // Use default settings if API fails
+            }
+        }
+
+        // Load Kecamatan GeoJSON layer from API
+        async function loadKecamatanLayer() {
+            try {
+                // Load kecamatan data from API
+                const response = await fetch('/api/kecamatan');
+                const result = await response.json();
+
+                if (!result.success || !result.data || result.data.length === 0) {
+                    console.log('No kecamatan data found');
+                    return;
+                }
+
+                // Combine all kecamatan geojson into one FeatureCollection
+                const allFeatures = [];
+                result.data.forEach(kec => {
+                    try {
+                        const geojson = typeof kec.geojson === 'string' ? JSON.parse(kec.geojson) : kec.geojson;
+                        if (geojson.features) {
+                            geojson.features.forEach(feature => {
+                                // Add kecamatan metadata to feature properties
+                                feature.properties = {
+                                    ...feature.properties,
+                                    id: kec.id,
+                                    kd_kecamatan: kec.kode,
+                                    nm_kecamatan: kec.nama,
+                                    nama: kec.nama,
+                                    kabupaten: kec.kabupaten,
+                                    provinsi: kec.provinsi,
+                                    luas: kec.luas,
+                                    warna: kec.warna
+                                };
+                                allFeatures.push(feature);
+                            });
+                        }
+                    } catch (e) {
+                        console.error('Error parsing geojson for kecamatan:', kec.nama, e);
+                    }
+                });
+
+                const geojsonData = {
+                    type: 'FeatureCollection',
+                    features: allFeatures
+                };
+
+                kecamatanData = geojsonData;
+
+                const kecamatanSettings = layerSettings.kecamatan || { fill_opacity: 0.15, stroke_opacity: 0.9, enabled: true };
+
+                kecamatanLayer = L.geoJSON(geojsonData, {
+                    style: function (feature) {
+                        const props = feature.properties;
+                        const kd = props.kd_kecamatan || props.id || Math.random().toString();
+                        const color = props.warna || getKecamatanColor(kd);
+                        return {
+                            color: color,
+                            weight: 3,
+                            opacity: kecamatanSettings.stroke_opacity,
+                            fillColor: color,
+                            fillOpacity: kecamatanSettings.fill_opacity,
+                            dashArray: '8, 4'
+                        };
+                    },
+                    onEachFeature: function (feature, layer) {
+                        const props = feature.properties;
+                        const namaKec = props.nm_kecamatan || props.nama || 'N/A';
+                        const kd = props.kd_kecamatan || props.id || '';
+                        const warna = getKecamatanColor(kd);
+
+                        layer.bindPopup(`
+                            <div style="padding: 12px; min-width: 180px;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #2a3a5c;">
+                                    <div style="width: 40px; height: 40px; background: ${warna}; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-map-marked-alt" style="color: white; font-size: 18px;"></i>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Kecamatan</div>
+                                        <div style="font-size: 1.1rem; font-weight: 700; color: ${warna};">${namaKec}</div>
+                                    </div>
+                                </div>
+                                <div style="font-size: 0.85rem; color: #94a3b8;">
+                                    <div style="margin-bottom: 4px;"><i class="fas fa-city" style="width: 20px; color: #64748b;"></i> Kabupaten Konawe</div>
+                                    <div style="margin-bottom: 4px;"><i class="fas fa-flag" style="width: 20px; color: #64748b;"></i> Sulawesi Tenggara</div>
+                                    ${props.kd_kecamatan ? `<div><i class="fas fa-hashtag" style="width: 20px; color: #64748b;"></i> Kode: ${props.kd_kecamatan}</div>` : ''}
+                                </div>
+                            </div>
+                        `);
+
+                        layer.on('mouseover', function (e) {
+                            this.setStyle({
+                                weight: 4,
+                                fillOpacity: 0.2,
+                                opacity: 1
+                            });
+                        });
+
+                        layer.on('mouseout', function (e) {
+                            kecamatanLayer.resetStyle(this);
+                        });
+
+                        const center = layer.getBounds().getCenter();
+                        const label = L.tooltip({
+                            permanent: true,
+                            direction: 'center',
+                            className: 'kecamatan-label'
+                        })
+                            .setContent(namaKec)
+                            .setLatLng(center);
+
+                        kecamatanLabels.push({ label, layer });
+                    }
+                });
+
+                // Add to map only if enabled
+                if (kecamatanSettings.enabled) {
+                    kecamatanLayer.addTo(map);
+                    kecamatanLabels.forEach(item => {
+                        item.label.addTo(map);
+                    });
+                }
+
+                console.log('Kecamatan layer loaded:', geojsonData.features?.length || 0, 'features');
+                return geojsonData;
+            } catch (error) {
+                console.error('Error loading kecamatan layer:', error);
+                return null;
+            }
+        }
+
+        // Kecamatan lookup table
+        let kecamatanLookup = {};
+
+        // Store kecamatan mapping: id -> kode, kode -> id
+        const kecamatanIdToKode = {};
+        const kecamatanKodeToId = {};
+
+        // Load Kelurahan/Desa GeoJSON layer
+        async function loadKelurahanLayer() {
+            try {
+                // Load kecamatan first for lookup
+                const kecResponse = await fetch('/api/kecamatan');
+                const kecResult = await kecResponse.json();
+
+                // Build lookup tables
+                if (kecResult.success && kecResult.data) {
+                    kecResult.data.forEach(kec => {
+                        kecamatanLookup[kec.kode] = kec.nama;
+                        kecamatanIdToKode[kec.id] = kec.kode;
+                        kecamatanKodeToId[kec.kode] = kec.id;
+                    });
+                }
+
+                // Load kelurahan data from API
+                const response = await fetch('/api/kelurahan');
+                const result = await response.json();
+
+                if (!result.success || !result.data || result.data.length === 0) {
+                    console.log('No kelurahan data found');
+                    kelurahanData = { type: 'FeatureCollection', features: [] };
+                    populateLegendLists();
+                    return;
+                }
+
+                // Combine all kelurahan geojson into one FeatureCollection
+                const allFeatures = [];
+                result.data.forEach(kel => {
+                    try {
+                        const geojson = typeof kel.geojson === 'string' ? JSON.parse(kel.geojson) : kel.geojson;
+                        if (geojson.features) {
+                            geojson.features.forEach(feature => {
+                                // Get kecamatan kode from kecamatan_id
+                                const kecKode = kel.kecamatan_id ?
+                                    (kecamatanIdToKode[kel.kecamatan_id] || '') : '';
+
+                                // Add kelurahan metadata to feature properties
+                                feature.properties = {
+                                    ...feature.properties,
+                                    id: kel.id,
+                                    kd_kelurahan: kel.kode,
+                                    nm_kelurahan: kel.nama,
+                                    nama: kel.nama,
+                                    kd_kecamatan: kecKode, // Use kode, not ID
+                                    kecamatan_id: kel.kecamatan_id, // Keep ID for reference
+                                    jenis: kel.jenis,
+                                    luas: kel.luas,
+                                    warna: kel.warna,
+                                    kecamatan_nama: kel.kecamatan_nama
+                                };
+                                allFeatures.push(feature);
+                            });
+                        }
+                    } catch (e) {
+                        console.error('Error parsing geojson for kelurahan:', kel.nama, e);
+                    }
+                });
+
+                const geojsonData = {
+                    type: 'FeatureCollection',
+                    features: allFeatures
+                };
+
+                kelurahanData = geojsonData;
+
+                console.log(`Loaded ${allFeatures.length} kelurahan features`);
+                console.log('Sample kelurahan:', allFeatures[0]?.properties);
+
+                const kelurahanSettings = layerSettings.kelurahan || { fill_opacity: 0.25, stroke_opacity: 0.85, enabled: true };
+
+                kelurahanLayer = L.geoJSON(geojsonData, {
+                    style: function (feature) {
+                        const props = feature.properties;
+                        const kd = props.kd_kelurahan || props.id || Math.random().toString();
+                        const color = props.warna || getKelurahanColor(kd);
+                        return {
+                            color: color,
+                            weight: 2,
+                            opacity: kelurahanSettings.stroke_opacity,
+                            fillColor: color,
+                            fillOpacity: kelurahanSettings.fill_opacity,
+                            dashArray: '4, 4'
+                        };
+                    },
+                    onEachFeature: function (feature, layer) {
+                        const props = feature.properties;
+                        const namaKel = props.nm_kelurahan || props.nama || 'N/A';
+                        const namaKec = kecamatanLookup[props.kd_kecamatan] || props.kecamatan_nama || props.nm_kecamatan || 'N/A';
+                        const kd = props.kd_kelurahan || props.id || '';
+                        const warna = getKelurahanColor(kd);
+                        const jenisLabel = props.jenis === 'desa' ? 'Desa' : 'Kelurahan';
+                        const jenisIcon = props.jenis === 'desa' ? 'fa-tree' : 'fa-home';
+
+                        layer.bindPopup(`
+                            <div style="padding: 12px; min-width: 200px;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #2a3a5c;">
+                                    <div style="width: 40px; height: 40px; background: ${warna}; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas ${jenisIcon}" style="color: white; font-size: 18px;"></i>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">${jenisLabel}</div>
+                                        <div style="font-size: 1.1rem; font-weight: 700; color: ${warna};">${namaKel}</div>
+                                    </div>
+                                </div>
+                                <div style="font-size: 0.85rem; color: #94a3b8;">
+                                    <div style="margin-bottom: 6px; padding: 8px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 3px solid #3b82f6;">
+                                        <div style="font-size: 0.7rem; color: #64748b; margin-bottom: 2px;">Kecamatan</div>
+                                        <div style="font-weight: 600; color: #60a5fa;">${namaKec}</div>
+                                    </div>
+                                    ${props.kd_kelurahan ? `<div style="margin-top: 8px;"><i class="fas fa-hashtag" style="width: 20px; color: #64748b;"></i> Kode: ${props.kd_kelurahan}</div>` : ''}
+                                </div>
+                            </div>
+                        `);
+
+                        layer.on('mouseover', function (e) {
+                            this.setStyle({
+                                weight: 3,
+                                fillOpacity: 0.3,
+                                opacity: 1
+                            });
+                        });
+
+                        layer.on('mouseout', function (e) {
+                            kelurahanLayer.resetStyle(this);
+                        });
+
+                        const center = layer.getBounds().getCenter();
+                        const label = L.tooltip({
+                            permanent: true,
+                            direction: 'center',
+                            className: 'kelurahan-label'
+                        })
+                            .setContent(namaKel)
+                            .setLatLng(center);
+
+                        kelurahanLabels.push({ label, layer });
+                    }
+                });
+
+                // Add to map only if enabled
+                if (kelurahanSettings.enabled) {
+                    kelurahanLayer.addTo(map);
+                    kelurahanLabels.forEach(item => {
+                        item.label.addTo(map);
+                    });
+                }
+
+                console.log('Kelurahan layer loaded:', geojsonData.features?.length || 0, 'features');
+
+                // Build layer map for quick lookup
+                kelurahanLayerMap.clear();
+                kelurahanLayer.eachLayer(layer => {
+                    const props = layer.feature?.properties;
+                    if (!props) return;
+
+                    const kelKode = String(props.kd_kelurahan || props.id || props.kode || '').trim();
+                    if (kelKode) {
+                        kelurahanLayerMap.set(kelKode, layer);
+                        // Also store without leading zeros for flexible matching
+                        const numericKode = kelKode.replace(/^0+/, '');
+                        if (numericKode !== kelKode && numericKode) {
+                            kelurahanLayerMap.set(numericKode, layer);
+                        }
+                        // Also store with leading zeros (padded to 3 digits)
+                        if (!isNaN(numericKode)) {
+                            const paddedKode = numericKode.padStart(3, '0');
+                            if (paddedKode !== kelKode) {
+                                kelurahanLayerMap.set(paddedKode, layer);
+                            }
+                        }
+                    }
+                });
+                console.log(`📋 Built kelurahan layer map with ${kelurahanLayerMap.size} entries`);
+
+                // Populate legend after both data loaded
+                // Wait a bit to ensure kecamatanData is ready
+                setTimeout(() => {
+                    populateLegendLists();
+                }, 100);
+            } catch (error) {
+                console.error('Error loading kelurahan layer:', error);
+                // Still try to populate if kecamatan data exists
+                if (kecamatanData) {
+                    setTimeout(() => {
+                        populateLegendLists();
+                    }, 100);
+                }
+            }
+        }
+
+
+        // Toggle Legend Panel collapse/expand
+        function toggleLegendPanel() {
+            const panel = document.getElementById('legend-panel');
+            panel.classList.toggle('collapsed');
+        }
+
+        // Current selected wilayah (multiple)
+        let selectedKecamatan = [];
+        let selectedKelurahan = [];
+
+        // Show All Layers
+        function showAllLayers() {
+            // Clear selections
+            selectedKecamatan = [];
+            selectedKelurahan = [];
+
+            // Show kecamatan layer
+            if (kecamatanLayer && !map.hasLayer(kecamatanLayer)) {
+                kecamatanLayer.addTo(map);
+            }
+
+            // Show kelurahan layer
+            if (kelurahanLayer && !map.hasLayer(kelurahanLayer)) {
+                kelurahanLayer.addTo(map);
+            }
+
+            // Reset styles
+            resetLayerStyles();
+
+            // Update UI selection
+            updateHierarchySelection();
+
+            // Update button state
+            document.getElementById('btn-show-all').classList.add('active');
+
+            // Reset map view
+            map.setView([-3.853623, 122.041614], 11);
+        }
+
+        // Hide All Layers
+        function hideAllLayers() {
+            // Clear selections
+            selectedKecamatan = [];
+            selectedKelurahan = [];
+
+            // Hide kecamatan layer
+            if (kecamatanLayer && map.hasLayer(kecamatanLayer)) {
+                map.removeLayer(kecamatanLayer);
+                kecamatanLabels.forEach(item => map.removeLayer(item.label));
+            }
+
+            // Hide kelurahan layer
+            if (kelurahanLayer && map.hasLayer(kelurahanLayer)) {
+                map.removeLayer(kelurahanLayer);
+                kelurahanLabels.forEach(item => map.removeLayer(item.label));
+            }
+
+            // Update UI selection
+            updateHierarchySelection();
+
+            // Update button state
+            document.getElementById('btn-show-all').classList.remove('active');
+        }
+
+        // Populate Hierarchy List
+        function populateLegendLists() {
+            if (!kecamatanData || !kelurahanData) {
+                console.log('Waiting for data...', {
+                    hasKecamatan: !!kecamatanData,
+                    hasKelurahan: !!kelurahanData
+                });
+                return;
+            }
+
+            const kecamatanFeatures = kecamatanData.features || [];
+            const kelurahanFeatures = kelurahanData.features || [];
+
+            console.log('Populating legend:', {
+                kecamatanCount: kecamatanFeatures.length,
+                kelurahanCount: kelurahanFeatures.length
+            });
+
+            const hierarchyList = document.getElementById('hierarchy-list');
+
+            if (kecamatanFeatures.length === 0) {
+                hierarchyList.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted);">Tidak ada data kecamatan</div>';
+                return;
+            }
+
+            let html = '';
+
+            kecamatanFeatures.forEach(kecFeature => {
+                const kecProps = kecFeature.properties;
+                const kecNama = kecProps.nm_kecamatan || kecProps.nama || 'N/A';
+                const kecKode = kecProps.kd_kecamatan || '';
+                const kecColor = kecProps.warna || getKecamatanColor(kecKode) || '#f59e0b';
+
+                // Get kelurahan for this kecamatan - match by kd_kecamatan (kode)
+                const kelList = kelurahanFeatures.filter(f => {
+                    const kelKecKode = String(f.properties.kd_kecamatan || '').trim();
+                    const match = kelKecKode === String(kecKode).trim();
+                    if (match) {
+                        console.log(`  ✓ Matched kelurahan: ${f.properties.nm_kelurahan} (kec: ${kelKecKode})`);
+                    }
+                    return match;
+                });
+
+                // Also try matching by kecamatan_id if available
+                if (kelList.length === 0 && kecProps.id) {
+                    const kelListById = kelurahanFeatures.filter(f => {
+                        return f.properties.kecamatan_id === kecProps.id;
+                    });
+                    if (kelListById.length > 0) {
+                        console.log(`  Found ${kelListById.length} kelurahan by ID for ${kecNama}`);
+                        kelList.push(...kelListById);
+                    }
+                }
+
+                console.log(`Kecamatan ${kecNama} (${kecKode}): found ${kelList.length} kelurahan`);
+
+                // Debug: log sample kelurahan kd_kecamatan values
+                if (kelurahanFeatures.length > 0 && kelList.length === 0) {
+                    console.log(`  Sample kelurahan kd_kecamatan values:`,
+                        kelurahanFeatures.slice(0, 3).map(f => ({
+                            nama: f.properties.nm_kelurahan,
+                            kd_kecamatan: f.properties.kd_kecamatan,
+                            kecamatan_id: f.properties.kecamatan_id
+                        }))
+                    );
+                }
+
+                html += `
+                    <div class="kec-group" data-kec="${kecKode}">
+                        <div class="kec-header" onclick="selectKecamatan('${kecKode}', event)">
+                            <span class="kec-expand" onclick="event.stopPropagation(); toggleKecGroup('${kecKode}')">
+                                <i class="fas fa-chevron-right"></i>
+                            </span>
+                            <span class="kec-radio"></span>
+                            <span class="kec-color" style="background: ${kecColor};"></span>
+                            <span class="kec-name">${kecNama}</span>
+                            <span class="kec-badge">${kelList.length}</span>
+                        </div>
+                        <div class="kel-list">
+                `;
+
+                kelList.forEach(kelFeature => {
+                    const kelProps = kelFeature.properties;
+                    const kelNama = kelProps.nm_kelurahan || kelProps.nama || 'N/A';
+                    // Ensure kode is string and trimmed - use exact value from GeoJSON
+                    const kelKode = String(kelProps.kd_kelurahan || kelProps.id || '').trim();
+                    const kelColor = kelProps.warna || getKelurahanColor(kelKode) || '#22c55e';
+                    const kelJenis = kelProps.jenis === 'desa' ? 'Desa' : 'Kel';
+
+                    // Escape quotes in kode to prevent issues
+                    const escapedKode = kelKode.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+                    html += `
+                        <div class="kel-item" data-kel="${escapedKode}" onclick="selectKelurahan('${escapedKode}')">
+                            <span class="kel-radio"></span>
+                            <span class="kel-color" style="background: ${kelColor};"></span>
+                            <span class="kel-name">${kelNama}</span>
+                            <span class="kel-type">${kelJenis}</span>
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Add kelurahan without kecamatan
+            const kelurahanWithoutKec = kelurahanFeatures.filter(f => {
+                const kelKecKode = String(f.properties.kd_kecamatan || '').trim();
+                const hasKecamatan = kecamatanFeatures.some(kec => {
+                    const kecKode = String(kec.properties.kd_kecamatan || '').trim();
+                    return kecKode === kelKecKode && kelKecKode !== '';
+                });
+                return !hasKecamatan;
+            });
+
+            if (kelurahanWithoutKec.length > 0) {
+                html += `
+                    <div class="kec-group" data-kec="unknown">
+                        <div class="kec-header" onclick="selectKecamatan('unknown', event)">
+                            <span class="kec-expand" onclick="event.stopPropagation(); toggleKecGroup('unknown')">
+                                <i class="fas fa-chevron-right"></i>
+                            </span>
+                            <span class="kec-radio"></span>
+                            <span class="kec-color" style="background: #64748b;"></span>
+                            <span class="kec-name">Tidak Diketahui</span>
+                            <span class="kec-badge">${kelurahanWithoutKec.length}</span>
+                        </div>
+                        <div class="kel-list">
+                `;
+
+                kelurahanWithoutKec.forEach(kelFeature => {
+                    const kelProps = kelFeature.properties;
+                    const kelNama = kelProps.nm_kelurahan || kelProps.nama || 'N/A';
+                    const kelKode = String(kelProps.kd_kelurahan || kelProps.id || '').trim();
+                    const kelColor = kelProps.warna || getKelurahanColor(kelKode) || '#22c55e';
+                    const kelJenis = kelProps.jenis === 'desa' ? 'Desa' : 'Kel';
+                    const escapedKode = kelKode.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+                    html += `
+                        <div class="kel-item" data-kel="${escapedKode}" onclick="selectKelurahan('${escapedKode}')">
+                            <span class="kel-radio"></span>
+                            <span class="kel-color" style="background: ${kelColor};"></span>
+                            <span class="kel-name">${kelNama}</span>
+                            <span class="kel-type">${kelJenis}</span>
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (html === '') {
+                html = '<div style="text-align:center;padding:2rem;color:var(--text-muted);">Tidak ada data wilayah</div>';
+            }
+
+            hierarchyList.innerHTML = html;
+
+            console.log('Legend populated:', {
+                kecamatanGroups: kecamatanFeatures.length,
+                kelurahanWithoutKec: kelurahanWithoutKec.length,
+                totalKelurahan: kelurahanFeatures.length
+            });
+        }
+
+        // Toggle Kecamatan Group expand/collapse
+        function toggleKecGroup(kecKode) {
+            const group = document.querySelector(`.kec-group[data-kec="${kecKode}"]`);
+            if (group) {
+                group.classList.toggle('expanded');
+            }
+        }
+
+        // Select/Deselect Kecamatan (Multiple)
+        function selectKecamatan(kecKode, event) {
+            // Don't select if clicking expand button
+            if (event && event.target.closest('.kec-expand')) return;
+
+            const index = selectedKecamatan.indexOf(kecKode);
+
+            if (index > -1) {
+                // Deselect
+                selectedKecamatan.splice(index, 1);
+            } else {
+                // Select
+                selectedKecamatan.push(kecKode);
+            }
+
+            // Update button state
+            if (selectedKecamatan.length === 0 && selectedKelurahan.length === 0) {
+                document.getElementById('btn-show-all').classList.add('active');
+            } else {
+                document.getElementById('btn-show-all').classList.remove('active');
+            }
+
+            // Show layers and highlight
+            updateMapLayers();
+
+            // Update UI selection
+            updateHierarchySelection();
+
+            // Expand the group if selected
+            const group = document.querySelector(`.kec-group[data-kec="${kecKode}"]`);
+            if (group && selectedKecamatan.includes(kecKode)) {
+                group.classList.add('expanded');
+            }
+
+            // Zoom to selected (with small delay to ensure layer is on map)
+            setTimeout(() => {
+                zoomToSelected();
+            }, 100);
+        }
+
+        // Select/Deselect Kelurahan (Multiple)
+        function selectKelurahan(kelKode) {
+            // Normalize kode
+            const normalizedKode = String(kelKode).trim();
+
+            const index = selectedKelurahan.indexOf(normalizedKode);
+
+            if (index > -1) {
+                // Deselect
+                selectedKelurahan.splice(index, 1);
+            } else {
+                // Select
+                selectedKelurahan.push(normalizedKode);
+            }
+
+            // Update button state
+            if (selectedKecamatan.length === 0 && selectedKelurahan.length === 0) {
+                document.getElementById('btn-show-all').classList.add('active');
+            } else {
+                document.getElementById('btn-show-all').classList.remove('active');
+            }
+
+            // Show layers and highlight
+            updateMapLayers();
+
+            // Update UI selection
+            updateHierarchySelection();
+
+            // Zoom to selected (with small delay to ensure layer is on map)
+            setTimeout(() => {
+                zoomToSelected();
+            }, 100);
+        }
+
+        // Update Map Layers based on selections
+        function updateMapLayers() {
+            // Show kecamatan layer if any kecamatan selected
+            if (selectedKecamatan.length > 0) {
+                if (kecamatanLayer && !map.hasLayer(kecamatanLayer)) {
+                    kecamatanLayer.addTo(map);
+                }
+            }
+
+            // Show kelurahan layer if any kelurahan selected
+            if (selectedKelurahan.length > 0) {
+                if (kelurahanLayer && !map.hasLayer(kelurahanLayer)) {
+                    kelurahanLayer.addTo(map);
+                }
+            }
+
+            // Highlight selected kecamatan
+            if (kecamatanLayer) {
+                kecamatanLayer.eachLayer(layer => {
+                    const props = layer.feature.properties;
+                    const kode = props.kd_kecamatan;
+                    const color = props.warna || getKecamatanColor(kode) || '#f59e0b';
+                    const isSelected = selectedKecamatan.includes(kode);
+
+                    if (isSelected) {
+                        layer.setStyle({
+                            weight: 4,
+                            opacity: 1,
+                            fillOpacity: 0.4,
+                            color: color,
+                            fillColor: color
+                        });
+                        layer.bringToFront();
+
+                        // Show label
+                        const labelItem = kecamatanLabels.find(item => {
+                            const layerKode = item.layer.feature?.properties?.kd_kecamatan;
+                            return layerKode === kode;
+                        });
+                        if (labelItem && !map.hasLayer(labelItem.label)) {
+                            labelItem.label.addTo(map);
+                        }
+                    } else {
+                        // If no selection or not selected, show faded
+                        if (selectedKecamatan.length === 0 && selectedKelurahan.length === 0) {
+                            // Show all normally
+                            layer.setStyle({
+                                weight: 2,
+                                opacity: 0.8,
+                                fillOpacity: 0.15,
+                                color: color,
+                                fillColor: color
+                            });
+                            const labelItem = kecamatanLabels.find(item => {
+                                const layerKode = item.layer.feature?.properties?.kd_kecamatan;
+                                return layerKode === kode;
+                            });
+                            if (labelItem && !map.hasLayer(labelItem.label)) {
+                                labelItem.label.addTo(map);
+                            }
+                        } else {
+                            // Fade out unselected
+                            layer.setStyle({
+                                weight: 1,
+                                opacity: 0.3,
+                                fillOpacity: 0.05,
+                                color: '#666',
+                                fillColor: '#666'
+                            });
+                            // Hide label
+                            const labelItem = kecamatanLabels.find(item => {
+                                const layerKode = item.layer.feature?.properties?.kd_kecamatan;
+                                return layerKode === kode;
+                            });
+                            if (labelItem && map.hasLayer(labelItem.label)) {
+                                map.removeLayer(labelItem.label);
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Highlight selected kelurahan
+            if (kelurahanLayer) {
+                // Normalize selected codes for comparison
+                const normalizedSelected = selectedKelurahan.map(k => String(k).trim());
+
+                kelurahanLayer.eachLayer(layer => {
+                    const props = layer.feature?.properties;
+                    if (!props) return;
+
+                    // Try multiple property names and normalize
+                    const kode = String(props.kd_kelurahan || props.id || props.kode || '').trim();
+                    const color = props.warna || getKelurahanColor(kode) || '#22c55e';
+                    const isSelected = normalizedSelected.includes(kode);
+
+                    if (isSelected) {
+                        layer.setStyle({
+                            weight: 4,
+                            opacity: 1,
+                            fillOpacity: 0.45,
+                            color: color,
+                            fillColor: color
+                        });
+                        layer.bringToFront();
+
+                        // Show label
+                        const labelItem = kelurahanLabels.find(item => {
+                            const layerKode = item.layer.feature?.properties?.kd_kelurahan;
+                            return layerKode === kode;
+                        });
+                        if (labelItem && !map.hasLayer(labelItem.label)) {
+                            labelItem.label.addTo(map);
+                        }
+                    } else {
+                        // If no selection or not selected, show faded
+                        if (selectedKecamatan.length === 0 && selectedKelurahan.length === 0) {
+                            // Show all normally
+                            layer.setStyle({
+                                weight: 2,
+                                opacity: 0.7,
+                                fillOpacity: 0.15,
+                                color: color,
+                                fillColor: color
+                            });
+                            const labelItem = kelurahanLabels.find(item => {
+                                const layerKode = item.layer.feature?.properties?.kd_kelurahan;
+                                return layerKode === kode;
+                            });
+                            if (labelItem && !map.hasLayer(labelItem.label)) {
+                                labelItem.label.addTo(map);
+                            }
+                        } else {
+                            // Fade out unselected
+                            layer.setStyle({
+                                weight: 1,
+                                opacity: 0.25,
+                                fillOpacity: 0.03,
+                                color: '#666',
+                                fillColor: '#666'
+                            });
+                            // Hide label
+                            const labelItem = kelurahanLabels.find(item => {
+                                const layerKode = item.layer.feature?.properties?.kd_kelurahan;
+                                return layerKode === kode;
+                            });
+                            if (labelItem && map.hasLayer(labelItem.label)) {
+                                map.removeLayer(labelItem.label);
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Zoom to all selected wilayah
+        function zoomToSelected() {
+            const bounds = L.latLngBounds();
+            let hasValidBounds = false;
+
+            // Add kecamatan bounds
+            if (kecamatanLayer && map.hasLayer(kecamatanLayer) && selectedKecamatan.length > 0) {
+                kecamatanLayer.eachLayer(layer => {
+                    const kode = layer.feature?.properties?.kd_kecamatan;
+                    if (kode && selectedKecamatan.includes(kode)) {
+                        try {
+                            bounds.extend(layer.getBounds());
+                            hasValidBounds = true;
+                        } catch (e) {
+                            console.warn('Error extending kecamatan bounds:', e);
+                        }
+                    }
+                });
+            }
+
+            // Add kelurahan bounds
+            if (kelurahanLayer && map.hasLayer(kelurahanLayer) && selectedKelurahan.length > 0) {
+                // Normalize selected codes
+                const normalizedSelected = selectedKelurahan.map(k => String(k).trim());
+
+                kelurahanLayer.eachLayer(layer => {
+                    const props = layer.feature?.properties;
+                    if (!props) return;
+
+                    // Try multiple property names and normalize
+                    const kelKode = String(props.kd_kelurahan || props.id || props.kode || '').trim();
+
+                    if (kelKode && normalizedSelected.includes(kelKode)) {
+                        try {
+                            bounds.extend(layer.getBounds());
+                            hasValidBounds = true;
+                        } catch (e) {
+                            console.warn('Error extending kelurahan bounds:', e, kelKode);
+                        }
+                    }
+                });
+            }
+
+            if (hasValidBounds && bounds.isValid()) {
+                map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+            } else if (selectedKelurahan.length === 1) {
+                // Fallback: zoom to single kelurahan directly
+                const kelKode = selectedKelurahan[0];
+                zoomToKelurahan(kelKode);
+            } else if (selectedKecamatan.length === 1) {
+                // Fallback: zoom to single kecamatan directly
+                const kecKode = selectedKecamatan[0];
+                zoomToKecamatan(kecKode);
+            }
+        }
+
+        // Update Hierarchy Selection UI
+        function updateHierarchySelection() {
+            // Clear all selections
+            document.querySelectorAll('.kec-header.selected').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('.kel-item.selected').forEach(el => el.classList.remove('selected'));
+
+            // Mark selected kecamatan
+            selectedKecamatan.forEach(kecKode => {
+                const header = document.querySelector(`.kec-group[data-kec="${kecKode}"] .kec-header`);
+                if (header) header.classList.add('selected');
+            });
+
+            // Mark selected kelurahan
+            selectedKelurahan.forEach(kelKode => {
+                const item = document.querySelector(`.kel-item[data-kel="${kelKode}"]`);
+                if (item) item.classList.add('selected');
+            });
+        }
+
+        // Reset all layer styles to default
+        function resetLayerStyles() {
+            if (kecamatanLayer) {
+                kecamatanLayer.eachLayer(layer => {
+                    const props = layer.feature.properties;
+                    const kode = props.kd_kecamatan;
+                    const color = props.warna || getKecamatanColor(kode) || '#f59e0b';
+                    layer.setStyle({
+                        weight: 2,
+                        opacity: 0.8,
+                        fillOpacity: 0.15,
+                        color: color,
+                        fillColor: color
+                    });
+                });
+
+                // Show all labels
+                kecamatanLabels.forEach(item => {
+                    if (!map.hasLayer(item.label)) {
+                        item.label.addTo(map);
+                    }
+                });
+            }
+
+            if (kelurahanLayer) {
+                kelurahanLayer.eachLayer(layer => {
+                    const props = layer.feature.properties;
+                    const kode = props.kd_kelurahan;
+                    const color = props.warna || getKelurahanColor(kode) || '#22c55e';
+                    layer.setStyle({
+                        weight: 2,
+                        opacity: 0.7,
+                        fillOpacity: 0.15,
+                        color: color,
+                        fillColor: color
+                    });
+                });
+
+                // Show all labels
+                kelurahanLabels.forEach(item => {
+                    if (!map.hasLayer(item.label)) {
+                        item.label.addTo(map);
+                    }
+                });
+            }
+        }
+
+        // Zoom to Kecamatan
+        function zoomToKecamatan(kode) {
+            if (!kecamatanLayer) {
+                console.warn('Kecamatan layer not initialized');
+                return;
+            }
+
+            // Ensure layer is on map
+            if (!map.hasLayer(kecamatanLayer)) {
+                kecamatanLayer.addTo(map);
+            }
+
+            let found = false;
+            kecamatanLayer.eachLayer(layer => {
+                const kecKode = layer.feature?.properties?.kd_kecamatan;
+                if (kecKode === kode) {
+                    try {
+                        const bounds = layer.getBounds();
+                        if (bounds && bounds.isValid()) {
+                            map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
+                            found = true;
+                            // Open popup after a short delay
+                            setTimeout(() => {
+                                layer.openPopup();
+                            }, 300);
+                        }
+                    } catch (e) {
+                        console.error('Error zooming to kecamatan:', e);
+                    }
+                }
+            });
+
+            if (!found) {
+                console.warn('Kecamatan not found:', kode);
+            }
+        }
+
+        // Zoom to Kelurahan
+        function zoomToKelurahan(kode) {
+            if (!kelurahanLayer) {
+                console.warn('Kelurahan layer not initialized');
+                return;
+            }
+
+            // Ensure layer is on map
+            if (!map.hasLayer(kelurahanLayer)) {
+                kelurahanLayer.addTo(map);
+            }
+
+            // Normalize kode (trim whitespace, convert to string)
+            const searchKode = String(kode).trim();
+            console.log('🔍 Searching for kelurahan with kode:', searchKode);
+
+            // First, try direct lookup from map
+            let targetLayer = kelurahanLayerMap.get(searchKode);
+
+            // Try without leading zeros
+            if (!targetLayer) {
+                const numericKode = searchKode.replace(/^0+/, '');
+                targetLayer = kelurahanLayerMap.get(numericKode);
+            }
+
+            // Try with leading zeros (if search was without)
+            if (!targetLayer && !isNaN(searchKode)) {
+                const paddedKode = searchKode.padStart(3, '0');
+                targetLayer = kelurahanLayerMap.get(paddedKode);
+            }
+
+            if (targetLayer) {
+                try {
+                    const bounds = targetLayer.getBounds();
+                    if (bounds && bounds.isValid()) {
+                        const props = targetLayer.feature?.properties;
+                        const kelNama = props?.nm_kelurahan || props?.nama || 'Unknown';
+                        const kelKode = String(props?.kd_kelurahan || '').trim();
+                        console.log(`✅ Found kelurahan: ${kelNama} (${kelKode}), zooming...`);
+                        map.fitBounds(bounds, { padding: [50, 50], maxZoom: 16 });
+                        // Open popup after a short delay
+                        setTimeout(() => {
+                            targetLayer.openPopup();
+                        }, 300);
+                        return;
+                    } else {
+                        console.warn('⚠️ Invalid bounds for kelurahan:', searchKode);
+                    }
+                } catch (e) {
+                    console.error('❌ Error zooming to kelurahan:', e, searchKode);
+                }
+            }
+
+            // Fallback: search manually
+            console.warn(`⚠️ Kelurahan not found in map, searching manually for: "${searchKode}"`);
+            let found = false;
+            let layerCount = 0;
+
+            kelurahanLayer.eachLayer(layer => {
+                layerCount++;
+                const props = layer.feature?.properties;
+                if (!props) return;
+
+                const kelKode = String(props.kd_kelurahan || props.id || props.kode || '').trim();
+                const kelNama = props.nm_kelurahan || props.nama || 'Unknown';
+
+                // Exact match
+                if (kelKode === searchKode) {
+                    found = true;
+                    try {
+                        const bounds = layer.getBounds();
+                        if (bounds && bounds.isValid()) {
+                            console.log(`✅ Found kelurahan manually: ${kelNama} (${kelKode})`);
+                            map.fitBounds(bounds, { padding: [50, 50], maxZoom: 16 });
+                            setTimeout(() => {
+                                layer.openPopup();
+                            }, 300);
+                            return false; // Stop iteration
+                        }
+                    } catch (e) {
+                        console.error('Error in manual search:', e);
+                    }
+                }
+            });
+
+            if (!found) {
+                console.error(`❌ Kelurahan not found: "${searchKode}" (searched ${layerCount} layers)`);
+                // Log first few kelurahan codes for debugging
+                if (kelurahanData?.features) {
+                    console.log('📋 Sample kelurahan codes:',
+                        kelurahanData.features.slice(0, 5).map(f => ({
+                            kode: f.properties?.kd_kelurahan,
+                            nama: f.properties?.nm_kelurahan
+                        }))
+                    );
+                }
+            }
+        }
+
+        // Create custom marker icon directly from PNG without pin wrapper
+        function createMarkerIcon(status) {
+            const opacity = status === 'active' ? 1 : 0.7;
+
+            // Use absolute URL to ensure proper loading
+            const iconUrl = window.location.origin + '/icons/cctv-icon.png';
+
+            // Create simple divIcon with just the PNG image, no pin wrapper
+            return L.divIcon({
+                className: 'cctv-marker-icon',
+                html: `
+                    <img src="${iconUrl}" 
+                         alt="CCTV" 
+                         style="width: 40px; height: 40px; opacity: ${opacity}; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));"
+                         onload="console.log('CCTV icon loaded')"
+                         onerror="console.error('CCTV icon failed to load')">
+                `,
+                iconSize: [40, 40],
+                iconAnchor: [20, 20],
+                popupAnchor: [0, -20]
+            });
+        }
+
+        // Load CCTV data
+        async function loadCCTV() {
+            try {
+                const response = await fetch(API_URL);
+                const result = await response.json();
+
+                if (result.success) {
+                    cctvData = result.data;
+                    renderCCTVList();
+                    renderMarkers();
+                    document.getElementById('cctv-count').textContent = cctvData.length;
+                    document.getElementById('floating-count').textContent = cctvData.length;
+                }
+            } catch (error) {
+                console.error('Error loading CCTV:', error);
+            }
+        }
+
+        // Load Trash Bins data
+        async function loadTrashBins() {
+            try {
+                const response = await fetch('/api/trash-bins');
+                const result = await response.json();
+
+                if (result.success) {
+                    trashBinsData = result.data.filter(bin => bin.status === 'active');
+                    renderTrashBinMarkers();
+                    updateTrashBinLegend();
+                }
+            } catch (error) {
+                console.error('Error loading trash bins:', error);
+            }
+        }
+
+        // Create trash bin marker icon
+        function createTrashBinIcon() {
+            // Use uploaded trash bin pin icon (orange pin with trash can)
+            // Priority: trash-bin-pin.png > waste-bin-location-pin.webp > trash.png
+            const iconUrl = window.location.origin + '/icons/trash-bin-pin.png';
+            const fallback1 = window.location.origin + '/icons/waste-bin-location-pin-as-vector-illustration-icon-160976290.webp';
+            const fallback2 = window.location.origin + '/icons/trash.png';
+
+            return L.divIcon({
+                className: 'trash-bin-marker-icon',
+                html: `
+                    <img src="${iconUrl}" 
+                         alt="Bak Sampah" 
+                         style="width: 48px; height: 48px; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4)); pointer-events: none;"
+                         onerror="this.onerror=null; this.src='${fallback1}'; this.onerror=function(){this.onerror=null; this.src='${fallback2}'; this.onerror=function(){this.style.display='none'; this.nextElementSibling.style.display='flex';};};">
+                    <div style="
+                        display: none;
+                        width: 40px;
+                        height: 40px;
+                        background: #f97316;
+                        border: 3px solid white;
+                        border-radius: 50%;
+                        align-items: center;
+                        justify-content: center;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                    ">
+                        <i class="fas fa-trash-alt" style="color: white; font-size: 16px;"></i>
+                    </div>
+                `,
+                iconSize: [48, 48],
+                iconAnchor: [24, 48], // Anchor at bottom center of pin (pin shape)
+                popupAnchor: [0, -48]
+            });
+        }
+
+        // Render trash bin markers on map
+        function renderTrashBinMarkers() {
+            // Remove existing markers
+            Object.values(trashBinMarkers).forEach(marker => map.removeLayer(marker));
+            trashBinMarkers = {};
+
+            if (!showTrashBins) return;
+
+            trashBinsData.forEach(bin => {
+                const marker = L.marker([bin.latitude, bin.longitude], {
+                    icon: createTrashBinIcon()
+                }).addTo(map);
+
+                // Tooltip on hover
+                marker.bindTooltip(`
+                    <div style="text-align: center;">
+                        <strong>${bin.nama}</strong><br>
+                        <small style="color: #64748b;">Kode: ${bin.kode}</small><br>
+                        ${bin.kecamatan_nama ? `<small>Kec: ${bin.kecamatan_nama}</small><br>` : ''}
+                        ${bin.kelurahan_nama ? `<small>Kel: ${bin.kelurahan_nama}</small><br>` : ''}
+                        <small style="color: #64748b;">${bin.latitude.toFixed(6)}, ${bin.longitude.toFixed(6)}</small>
+                    </div>
+                `, {
+                    direction: 'top',
+                    offset: [0, -35],
+                    className: 'custom-tooltip'
+                });
+
+                // Popup on click
+                marker.bindPopup(`
+                    <div style="min-width: 200px;">
+                        <h3 style="margin: 0 0 8px 0; color: #22c55e;">
+                            <i class="fas fa-trash-alt"></i> ${bin.nama}
+                        </h3>
+                        <p style="margin: 4px 0; font-size: 0.85rem;">
+                            <strong>Kode:</strong> ${bin.kode}
+                        </p>
+                        ${bin.kecamatan_nama ? `<p style="margin: 4px 0; font-size: 0.85rem;"><strong>Kecamatan:</strong> ${bin.kecamatan_nama}</p>` : ''}
+                        ${bin.kelurahan_nama ? `<p style="margin: 4px 0; font-size: 0.85rem;"><strong>Kelurahan:</strong> ${bin.kelurahan_nama}</p>` : ''}
+                        <p style="margin: 4px 0; font-size: 0.75rem; color: #64748b;">
+                            <strong>Koordinat:</strong><br>
+                            ${bin.latitude.toFixed(6)}, ${bin.longitude.toFixed(6)}
+                        </p>
+                        ${bin.description ? `<p style="margin: 4px 0; font-size: 0.85rem; color: #64748b;">${bin.description}</p>` : ''}
+                    </div>
+                `);
+
+                trashBinMarkers[bin.id] = marker;
+            });
+        }
+
+        // Update trash bin legend
+        function updateTrashBinLegend() {
+            const count = trashBinsData.length;
+            const legendCount = document.getElementById('trash-bin-count');
+            if (legendCount) {
+                legendCount.textContent = count;
+            }
+        }
+
+        // Toggle trash bins visibility
+        function toggleTrashBins() {
+            showTrashBins = !showTrashBins;
+            renderTrashBinMarkers();
+
+            const toggleBtn = document.getElementById('toggle-trash-bins');
+            const toggleText = document.getElementById('trash-bin-toggle-text');
+            if (toggleBtn) {
+                toggleBtn.classList.toggle('active', showTrashBins);
+            }
+            if (toggleText) {
+                toggleText.textContent = showTrashBins ? 'Sembunyikan' : 'Tampilkan';
+            }
+        }
+
+        // Render CCTV list in sidebar
+        function renderCCTVList(filter = '') {
+            const list = document.getElementById('cctv-list');
+            const filtered = cctvData.filter(cctv =>
+                cctv.name.toLowerCase().includes(filter.toLowerCase()) ||
+                (cctv.location && cctv.location.toLowerCase().includes(filter.toLowerCase()))
+            );
+
+            if (filtered.length === 0) {
+                list.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                        <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                        <p>Tidak ada CCTV ditemukan</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = filtered.map(cctv => `
+                <div class="cctv-card ${selectedCctvId === cctv.id ? 'active' : ''}" 
+                     onclick="selectCCTV('${cctv.id}')" 
+                     data-id="${cctv.id}">
+                    <div class="cctv-card-header">
+                        <span class="cctv-name">${cctv.name}</span>
+                        <span class="status-badge ${cctv.status}">
+                            <span class="dot"></span>
+                            ${cctv.status === 'active' ? 'Online' : 'Offline'}
+                        </span>
+                    </div>
+                    <div class="cctv-location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        ${cctv.location || 'Lokasi tidak tersedia'}
+                    </div>
+                    <button class="btn-watch" onclick="event.stopPropagation(); openStream('${cctv.id}')" ${cctv.status !== 'active' ? 'disabled' : ''}>
+                        <i class="fas fa-play-circle"></i>
+                        Lihat Live Stream
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Render markers on map
+        function renderMarkers() {
+            Object.values(markers).forEach(marker => map.removeLayer(marker));
+            markers = {};
+
+            cctvData.forEach(cctv => {
+                const marker = L.marker([cctv.latitude, cctv.longitude], {
+                    icon: createMarkerIcon(cctv.status)
+                }).addTo(map);
+
+                // Tooltip on hover
+                marker.bindTooltip(`
+                    <div style="text-align: center;">
+                        <strong>${cctv.name}</strong><br>
+                        <small style="color: ${cctv.status === 'active' ? '#22c55e' : '#64748b'}">
+                            ● ${cctv.status === 'active' ? 'Online' : 'Offline'}
+                        </small><br>
+                        <small>Klik untuk lihat stream</small>
+                    </div>
+                `, {
+                    direction: 'top',
+                    offset: [0, -45],
+                    className: 'custom-tooltip'
+                });
+
+                // Click marker = langsung buka stream
+                marker.on('click', () => {
+                    selectCCTV(cctv.id);
+                    openStream(cctv.id);
+                });
+
+                markers[cctv.id] = marker;
+            });
+        }
+
+        // Select CCTV
+        function selectCCTV(id) {
+            selectedCctvId = id;
+
+            document.querySelectorAll('.cctv-card').forEach(card => {
+                card.classList.toggle('active', card.dataset.id === id);
+            });
+
+            const cctv = cctvData.find(c => c.id === id);
+            if (cctv) {
+                map.flyTo([cctv.latitude, cctv.longitude], 15, { duration: 0.8 });
+                markers[id].openPopup();
+            }
+        }
+
+        // Open stream modal
+        async function openStream(id) {
+            const cctv = cctvData.find(c => c.id === id);
+            if (!cctv) return;
+
+            currentCctvId = id;
+            document.getElementById('video-modal-title').textContent = cctv.name;
+            document.getElementById('info-location').textContent = cctv.location || '-';
+            document.getElementById('info-status').textContent = cctv.status === 'active' ? '🟢 Online' : '⚫ Offline';
+            document.getElementById('info-coords').textContent = `${cctv.latitude.toFixed(6)}, ${cctv.longitude.toFixed(6)}`;
+            document.getElementById('info-desc').textContent = cctv.description || '-';
+
+            // Add AI Toggle if not exists
+            const headerActions = document.querySelector('.modal-header');
+            if (!document.getElementById('ai-toggle-container')) {
+                const toggleContainer = document.createElement('div');
+                toggleContainer.id = 'ai-toggle-container';
+                toggleContainer.style.display = 'flex';
+                toggleContainer.style.alignItems = 'center';
+                toggleContainer.style.gap = '10px';
+                toggleContainer.style.marginRight = '20px'; // Spacing from close button
+
+                toggleContainer.innerHTML = `
+                    <span style="color: white; font-size: 0.9rem; font-weight: 500;">Fitur AI</span>
+                    <label class="switch">
+                        <input type="checkbox" id="ai-toggle-checkbox">
+                        <span class="slider round"></span>
+                    </label>
+                `;
+
+                // Insert before close button
+                const closeBtn = document.querySelector('.modal-close');
+                headerActions.insertBefore(toggleContainer, closeBtn);
+
+                // Add event listener
+                const checkbox = toggleContainer.querySelector('#ai-toggle-checkbox');
+                checkbox.addEventListener('change', function () {
+                    const enabled = this.checked;
+                    if (activeWebSocket && activeWebSocket.readyState === WebSocket.OPEN) {
+                        activeWebSocket.send(JSON.stringify({
+                            type: 'toggle_ai',
+                            enabled: enabled
+                        }));
+                        console.log('Sent toggle_ai:', enabled);
+                    } else {
+                        console.warn('WebSocket not connected');
+                        // Revert check if failed? Maybe not for now.
+                    }
+
+                    if (!enabled) {
+                        // Clear detections on UI immediately if turned off
+                        currentDetections = [];
+                        if (detectionCanvas && detectionCtx) {
+                            detectionCtx.clearRect(0, 0, detectionCanvas.width, detectionCanvas.height);
+                        }
+                        updateDetectionInfo(null); // Clear info panel
+                    }
+                });
+            } else {
+                // Reset state when reopening modal
+                const checkbox = document.getElementById('ai-toggle-checkbox');
+                if (checkbox) {
+                    checkbox.checked = false; // Reset to off
+                    stopDemo(); // Ensure off
+                }
+            }
+
+            document.getElementById('video-modal').classList.add('active');
+
+            // Load ROI settings
+            await loadRoiSettings(id);
+
+            document.getElementById('video-container').innerHTML = `
+                <div class="video-placeholder">
+                    <i class="fas fa-video"></i>
+                    <p>Menghubungkan ke stream...</p>
+                    <div class="loading-spinner"></div>
+                </div>
+            `;
+
+            try {
+                if (activeWebSocket) {
+                    activeWebSocket.close();
+                }
+
+                activeWebSocket = new WebSocket(`${WS_URL}/stream/${id}`);
+
+                activeWebSocket.onopen = () => {
+                    console.log('WebSocket connected');
+                };
+
+                activeWebSocket.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+
+                    if (data.type === 'frame') {
+                        const container = document.getElementById('video-container');
+
+                        // Remove placeholder if exists (first frame)
+                        const placeholder = container.querySelector('.video-placeholder');
+                        if (placeholder) {
+                            placeholder.remove();
+                        }
+
+                        // Remove old image if exists (but keep canvas elements)
+                        const existingImg = container.querySelector('img');
+                        if (existingImg) {
+                            existingImg.remove();
+                        }
+
+                        const img = document.createElement('img');
+                        img.src = `data:image/jpeg;base64,${data.data}`;
+                        img.alt = 'CCTV Stream';
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.objectFit = 'contain';
+
+                        // Append image first (before onload to ensure it's in DOM)
+                        container.appendChild(img);
+
+                        img.onload = function () {
+                            console.log('Image loaded, natural size:', img.naturalWidth, img.naturalWidth);
+
+                            // Setup canvas overlay for bounding boxes
+                            if (!detectionCanvas) {
+                                detectionCanvas = document.createElement('canvas');
+                                detectionCanvas.style.position = 'absolute';
+                                detectionCanvas.style.top = '0';
+                                detectionCanvas.style.left = '0';
+                                detectionCanvas.style.pointerEvents = 'none';
+                                detectionCanvas.style.zIndex = '10';
+                                container.appendChild(detectionCanvas);
+                                detectionCtx = detectionCanvas.getContext('2d');
+                            }
+
+                            // Resize canvas to match image
+                            detectionCanvas.width = img.offsetWidth || img.naturalWidth;
+                            detectionCanvas.height = img.offsetHeight || img.naturalHeight;
+
+                            // Setup ROI canvas if not exists (always create for displaying ROI box)
+                            if (!roiCanvas) {
+                                console.log('Creating ROI canvas');
+                                setupRoiCanvas();
+                            }
+
+                            // Ensure ROI canvas exists and is properly sized
+                            if (!roiCanvas || !container.querySelector('.roi-canvas')) {
+                                console.log('ROI canvas missing, recreating...');
+                                setupRoiCanvas();
+                            }
+
+                            // Wait a bit for everything to be ready, then update size and draw
+                            setTimeout(() => {
+                                // Re-check ROI canvas (might have been removed)
+                                if (!roiCanvas || !container.querySelector('.roi-canvas')) {
+                                    console.log('ROI canvas still missing, creating again...');
+                                    setupRoiCanvas();
+                                }
+
+                                if (roiCanvas) {
+                                    const rect = container.getBoundingClientRect();
+                                    roiCanvas.width = rect.width;
+                                    roiCanvas.height = rect.height;
+                                    console.log('ROI canvas resized to:', roiCanvas.width, roiCanvas.height);
+                                    console.log('Current ROI:', currentRoi);
+
+                                    // Draw ROI box if exists (always show ROI box when available)
+                                    if (currentRoi) {
+                                        console.log('Drawing ROI box...');
+                                        drawRoiBox();
+                                    } else {
+                                        console.log('No ROI to draw');
+                                    }
+                                }
+                            }, 100);
+
+                            // Clear previous drawings
+                            detectionCtx.clearRect(0, 0, detectionCanvas.width, detectionCanvas.height);
+
+                            // Draw bounding boxes if available
+                            if (currentDetections.length > 0) {
+                                drawBoundingBoxes(detectionCtx, detectionCanvas.width, detectionCanvas.height, currentDetections);
+                            }
+                        };
+
+                        // Image already appended in onload handler above
+                        // Don't use innerHTML as it removes canvas elements
+                    } else if (data.type === 'detection') {
+                        // Update detection results
+                        currentDetections = data.data.detections || [];
+
+                        // Update detection info
+                        updateDetectionInfo(data.data);
+
+                        // Redraw bounding boxes
+                        if (detectionCanvas && detectionCtx) {
+                            const img = document.querySelector('#video-container img');
+                            if (img) {
+                                detectionCanvas.width = img.offsetWidth || img.naturalWidth;
+                                detectionCanvas.height = img.offsetHeight || img.naturalHeight;
+                                detectionCtx.clearRect(0, 0, detectionCanvas.width, detectionCanvas.height);
+                                drawBoundingBoxes(detectionCtx, detectionCanvas.width, detectionCanvas.height, currentDetections);
+                            }
+                        }
+                    } else if (data.type === 'error') {
+                        document.getElementById('video-container').innerHTML = `
+                            <div class="video-placeholder">
+                                <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i>
+                                <p>Error: ${data.message}</p>
+                                <p style="font-size: 0.8rem; color: var(--text-muted);">Pastikan FFmpeg terinstall</p>
+                            </div>
+                        `;
+                    } else if (data.type === 'closed') {
+                        document.getElementById('video-container').innerHTML = `
+                            <div class="video-placeholder">
+                                <i class="fas fa-video-slash" style="color: var(--warning);"></i>
+                                <p>Stream berakhir</p>
+                            </div>
+                        `;
+                    }
+                };
+
+                activeWebSocket.onerror = () => {
+                    document.getElementById('video-container').innerHTML = `
+                        <div class="video-placeholder">
+                            <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i>
+                            <p>Gagal menghubungkan ke stream</p>
+                            <p style="font-size: 0.8rem; color: var(--text-muted);">Periksa koneksi jaringan</p>
+                        </div>
+                    `;
+                };
+            } catch (error) {
+                console.error('Error connecting to stream:', error);
+            }
+        }
+
+        // Draw bounding boxes on canvas
+        function drawBoundingBoxes(ctx, canvasWidth, canvasHeight, detections) {
+            if (!detections || detections.length === 0) return;
+
+            const img = document.querySelector('#video-container img');
+            if (!img) return;
+
+            // Get image dimensions
+            const imgWidth = img.naturalWidth || img.offsetWidth;
+            const imgHeight = img.naturalHeight || img.offsetHeight;
+
+            // Calculate scale
+            const scaleX = canvasWidth / imgWidth;
+            const scaleY = canvasHeight / imgHeight;
+
+            detections.forEach(detection => {
+                const [x, y, width, height] = detection.bbox;
+                const className = detection.class;
+                const score = detection.score;
+
+                // Scale coordinates
+                const scaledX = x * scaleX;
+                const scaledY = y * scaleY;
+                const scaledWidth = width * scaleX;
+                const scaledHeight = height * scaleY;
+
+                // Style configuration based on class
+                let color = '#22c55e'; // Default green
+                let textColor = '#22c55e';
+                let statusText = ''; // Not used in this snippet, but declared as per instruction
+
+                if (detection.class === 'Bak Sampah' || detection.class === 'Container') {
+                    color = '#22c55e'; // Green
+                    textColor = '#22c55e';
+                    statusText = 'NORMAL';
+                } else if (detection.class === 'Sampah_Overload') {
+                    color = '#ef4444'; // Red
+                    textColor = '#ef4444';
+                    statusText = 'OVERLOAD';
+                } else if (detection.class === 'Sampah_Berserakan') {
+                    color = '#eab308'; // Yellow
+                    textColor = '#eab308';
+                } else if (detection.class === 'Orang_Buang_Sampah') {
+                    color = '#a855f7'; // Purple
+                    textColor = '#a855f7';
+                } else if (detection.class === 'Orang') {
+                    color = '#3b82f6'; // Blue
+                    textColor = '#3b82f6';
+                }
+
+                // Draw box
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 3;
+                ctx.strokeRect(scaledX, scaledY, scaledWidth, scaledHeight);
+
+                // Add semi-transparent fill
+                ctx.fillStyle = color + '20'; // 20 = approx 12% opacity
+                ctx.fillRect(scaledX, scaledY, scaledWidth, scaledHeight);
+
+                // Draw label
+                ctx.font = 'bold 20px "Courier New", monospace'; // Technical font
+                const scorePct = Math.round(detection.score * 100);
+                let labelText = `${detection.class.replace(/_/g, ' ')} ${scorePct}%`;
+
+                // Text Overlap Avoidance
+                // We keep track of occupied Y zones for labels at similar X positions (simplified)
+                // A better approach for the specific "Bak Sampah vs Overload" case:
+                // If class is Overload, put text at BOTTOM of box instead of TOP
+
+                let textY = scaledY - 7;
+                if (className === 'Sampah_Overload') {
+                    // Put overload label inside/at bottom of its box to avoid clashing with Container label
+                    textY = scaledY + 25;
+                }
+
+                // Draw label text
+                ctx.fillStyle = textColor;
+                // Add a small shadow to ensure readability against video
+                ctx.shadowColor = 'black';
+                ctx.shadowBlur = 4;
+                ctx.shadowOffsetX = 1;
+                ctx.shadowOffsetY = 1;
+                ctx.fillText(labelText, scaledX, textY);
+
+                // Reset shadow
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+            });
+        }
+
+        // ============ ROI (Region of Interest) Functions ============
+
+        // Load ROI settings from API
+        async function loadRoiSettings(cctvId) {
+            try {
+                const response = await fetch(`/api/roi/${cctvId}`);
+                const result = await response.json();
+
+                console.log('ROI settings loaded:', result);
+
+                if (result.success && result.data && result.data.roi && result.data.enabled) {
+                    currentRoi = result.data.roi;
+                    console.log('ROI loaded:', currentRoi);
+                    // ROI box will be drawn when image loads in img.onload
+                } else {
+                    currentRoi = null;
+                    clearRoiBox();
+                }
+            } catch (error) {
+                console.error('Error loading ROI:', error);
+                currentRoi = null;
+            }
+        }
+
+        // Setup ROI canvas
+        function setupRoiCanvas() {
+            const container = document.getElementById('video-container');
+            if (!container) {
+                console.error('Video container not found');
+                return;
+            }
+
+            // Remove existing ROI canvas
+            const existing = container.querySelector('.roi-canvas');
+            if (existing) {
+                existing.remove();
+                roiCanvas = null;
+                roiCtx = null;
+            }
+
+            // Create ROI canvas
+            roiCanvas = document.createElement('canvas');
+            roiCanvas.className = 'roi-canvas';
+            roiCanvas.style.position = 'absolute';
+            roiCanvas.style.top = '0';
+            roiCanvas.style.left = '0';
+            roiCanvas.style.width = '100%';
+            roiCanvas.style.height = '100%';
+            roiCanvas.style.zIndex = '12'; // Above image, below detection canvas (z-index 10)
+            roiCanvas.style.cursor = roiMode ? 'crosshair' : 'default';
+            roiCanvas.style.pointerEvents = roiMode ? 'auto' : 'none'; // Only interactive in ROI mode
+            container.appendChild(roiCanvas);
+            roiCtx = roiCanvas.getContext('2d');
+
+            // Resize canvas to match container
+            const resizeCanvas = () => {
+                const img = container.querySelector('img');
+                if (img && roiCanvas) {
+                    const rect = container.getBoundingClientRect();
+                    roiCanvas.width = rect.width;
+                    roiCanvas.height = rect.height;
+                    console.log('ROI canvas resized:', roiCanvas.width, roiCanvas.height);
+                }
+            };
+
+            // Resize immediately if image exists
+            const img = container.querySelector('img');
+            if (img && img.complete) {
+                resizeCanvas();
+            } else if (img) {
+                // Wait for image to load
+                img.onload = () => {
+                    resizeCanvas();
+                    if (currentRoi) {
+                        drawRoiBox();
+                    }
+                };
+            } else {
+                // No image yet, resize to container
+                resizeCanvas();
+            }
+
+            // Also resize on window resize
+            window.addEventListener('resize', resizeCanvas);
+        }
+
+        // Draw ROI box
+        function drawRoiBox() {
+            console.log('drawRoiBox called', { roiCanvas: !!roiCanvas, roiCtx: !!roiCtx, currentRoi });
+
+            if (!roiCanvas || !roiCtx) {
+                console.log('ROI canvas or context not available');
+                return;
+            }
+
+            if (!currentRoi) {
+                console.log('No ROI to draw');
+                clearRoiBox();
+                return;
+            }
+
+            const container = document.getElementById('video-container');
+            if (!container) {
+                console.log('Video container not found');
+                return;
+            }
+
+            const img = container.querySelector('img');
+            if (!img) {
+                console.log('No image found for ROI drawing');
+                return;
+            }
+
+            // Get actual image dimensions - try multiple methods
+            let imgWidth = img.naturalWidth;
+            let imgHeight = img.naturalHeight;
+
+            if (!imgWidth || !imgHeight) {
+                imgWidth = img.offsetWidth;
+                imgHeight = img.offsetHeight;
+            }
+
+            if (!imgWidth || !imgHeight) {
+                imgWidth = img.clientWidth;
+                imgHeight = img.clientHeight;
+            }
+
+            if (!imgWidth || !imgHeight) {
+                const rect = img.getBoundingClientRect();
+                imgWidth = rect.width;
+                imgHeight = rect.height;
+            }
+
+            if (!imgWidth || !imgHeight || imgWidth === 0 || imgHeight === 0) {
+                console.log('Image dimensions not available yet:', { imgWidth, imgHeight });
+                return;
+            }
+
+            // Get canvas dimensions
+            const canvasWidth = roiCanvas.width;
+            const canvasHeight = roiCanvas.height;
+
+            if (!canvasWidth || !canvasHeight || canvasWidth === 0 || canvasHeight === 0) {
+                console.log('Canvas dimensions not available:', { canvasWidth, canvasHeight });
+                return;
+            }
+
+            // Calculate scale from image to canvas
+            const scaleX = canvasWidth / imgWidth;
+            const scaleY = canvasHeight / imgHeight;
+
+            // Clear canvas first
+            roiCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            // Scale ROI coordinates to canvas
+            const x = currentRoi.x * scaleX;
+            const y = currentRoi.y * scaleY;
+            const width = currentRoi.width * scaleX;
+            const height = currentRoi.height * scaleY;
+
+            console.log('Drawing ROI box:', {
+                roi: currentRoi,
+                imgSize: { imgWidth, imgHeight },
+                canvasSize: { canvasWidth, canvasHeight },
+                scale: { scaleX, scaleY },
+                scaled: { x, y, width, height }
+            });
+
+            // Validate coordinates
+            if (isNaN(x) || isNaN(y) || isNaN(width) || isNaN(height)) {
+                console.error('Invalid ROI coordinates:', { x, y, width, height });
+                return;
+            }
+
+            // Draw ROI box
+            roiCtx.strokeStyle = '#00ff00';
+            roiCtx.lineWidth = 3;
+            roiCtx.setLineDash([5, 5]);
+            roiCtx.strokeRect(x, y, width, height);
+
+            // Draw fill with transparency
+            roiCtx.fillStyle = 'rgba(0, 255, 0, 0.15)';
+            roiCtx.fillRect(x, y, width, height);
+
+            // Draw label background
+            roiCtx.setLineDash([]);
+            roiCtx.fillStyle = '#00ff00';
+            roiCtx.font = 'bold 14px Arial';
+            const labelText = 'Area Deteksi';
+            const textMetrics = roiCtx.measureText(labelText);
+            const labelWidth = textMetrics.width + 10;
+            const labelHeight = 20;
+
+            // Draw label background
+            roiCtx.fillStyle = 'rgba(0, 255, 0, 0.8)';
+            roiCtx.fillRect(x, Math.max(0, y - labelHeight), labelWidth, labelHeight);
+
+            // Draw label text
+            roiCtx.fillStyle = '#000000';
+            roiCtx.fillText(labelText, x + 5, Math.max(15, y - 5));
+
+            console.log('ROI box drawn successfully');
+        }
+
+        // Clear ROI box
+        function clearRoiBox() {
+            if (roiCtx && roiCanvas) {
+                roiCtx.clearRect(0, 0, roiCanvas.width, roiCanvas.height);
+            }
+        }
+
+        // Toggle ROI mode
+        function toggleRoiMode() {
+            roiMode = !roiMode;
+            const container = document.getElementById('video-container');
+            const toggleBtn = document.getElementById('roi-toggle-btn');
+            const saveBtn = document.getElementById('roi-save-btn');
+            const cancelBtn = document.getElementById('roi-cancel-btn');
+            const resetBtn = document.getElementById('roi-reset-btn');
+
+            if (roiMode) {
+                container.classList.add('roi-mode');
+                toggleBtn.innerHTML = '<i class="fas fa-check"></i> Selesai Menggambar';
+                toggleBtn.classList.remove('btn-secondary');
+                toggleBtn.classList.add('btn-success');
+                saveBtn.style.display = 'inline-block';
+                cancelBtn.style.display = 'inline-block';
+                resetBtn.style.display = 'inline-block';
+
+                // Setup canvas first, then drawing handlers
+                setupRoiCanvas();
+
+                // Wait a bit for canvas to be ready
+                setTimeout(() => {
+                    setupRoiDrawing();
+                    console.log('ROI mode enabled, canvas ready');
+                }, 100);
+            } else {
+                container.classList.remove('roi-mode');
+                toggleBtn.innerHTML = '<i class="fas fa-crop"></i> Atur Area Deteksi';
+                toggleBtn.classList.remove('btn-success');
+                toggleBtn.classList.add('btn-secondary');
+                saveBtn.style.display = 'none';
+                cancelBtn.style.display = 'none';
+                resetBtn.style.display = 'none';
+                removeRoiDrawing();
+            }
+        }
+
+        // Setup ROI drawing handlers
+        function setupRoiDrawing() {
+            if (!roiCanvas || !roiCtx) {
+                console.error('ROI canvas not ready');
+                return;
+            }
+
+            console.log('Setting up ROI drawing handlers');
+
+            // Remove existing handlers first
+            roiCanvas.onmousedown = null;
+            roiCanvas.onmousemove = null;
+            roiCanvas.onmouseup = null;
+            roiCanvas.onmouseleave = null;
+
+            roiCanvas.onmousedown = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!roiMode) {
+                    console.log('ROI mode not active');
+                    return;
+                }
+                console.log('Mouse down on ROI canvas');
+                isDrawingRoi = true;
+                const rect = roiCanvas.getBoundingClientRect();
+                roiStartX = e.clientX - rect.left;
+                roiStartY = e.clientY - rect.top;
+                console.log('Start position:', roiStartX, roiStartY);
+            };
+
+            roiCanvas.onmousemove = (e) => {
+                if (!isDrawingRoi || !roiMode) return;
+                e.preventDefault();
+                e.stopPropagation();
+
+                const rect = roiCanvas.getBoundingClientRect();
+                const currentX = e.clientX - rect.left;
+                const currentY = e.clientY - rect.top;
+
+                const img = document.querySelector('#video-container img');
+                if (!img) return;
+
+                const imgWidth = img.naturalWidth || img.offsetWidth;
+                const imgHeight = img.naturalHeight || img.offsetHeight;
+                const scaleX = imgWidth / roiCanvas.width;
+                const scaleY = imgHeight / roiCanvas.height;
+
+                const x = Math.min(roiStartX, currentX);
+                const y = Math.min(roiStartY, currentY);
+                const width = Math.abs(currentX - roiStartX);
+                const height = Math.abs(currentY - roiStartY);
+
+                // Draw temporary box
+                roiCtx.clearRect(0, 0, roiCanvas.width, roiCanvas.height);
+                roiCtx.strokeStyle = '#00ff00';
+                roiCtx.lineWidth = 3;
+                roiCtx.setLineDash([5, 5]);
+                roiCtx.strokeRect(x, y, width, height);
+                roiCtx.fillStyle = 'rgba(0, 255, 0, 0.1)';
+                roiCtx.fillRect(x, y, width, height);
+            };
+
+            roiCanvas.onmouseup = (e) => {
+                if (!isDrawingRoi || !roiMode) return;
+                e.preventDefault();
+                e.stopPropagation();
+                isDrawingRoi = false;
+
+                const rect = roiCanvas.getBoundingClientRect();
+                const endX = e.clientX - rect.left;
+                const endY = e.clientY - rect.top;
+
+                const img = document.querySelector('#video-container img');
+                if (!img) {
+                    console.error('No image found');
+                    return;
+                }
+
+                const imgWidth = img.naturalWidth || img.offsetWidth;
+                const imgHeight = img.naturalHeight || img.offsetHeight;
+                const scaleX = imgWidth / roiCanvas.width;
+                const scaleY = imgHeight / roiCanvas.height;
+
+                const x = Math.min(roiStartX, endX) * scaleX;
+                const y = Math.min(roiStartY, endY) * scaleY;
+                const width = Math.abs(endX - roiStartX) * scaleX;
+                const height = Math.abs(endY - roiStartY) * scaleY;
+
+                console.log('ROI drawn:', { x, y, width, height });
+
+                if (width > 10 && height > 10) {
+                    currentRoi = { x, y, width, height };
+                    drawRoiBox();
+                    console.log('ROI saved:', currentRoi);
+                } else {
+                    console.log('ROI too small, ignored');
+                }
+            };
+
+            roiCanvas.onmouseleave = (e) => {
+                if (isDrawingRoi) {
+                    // Cancel drawing if mouse leaves
+                    isDrawingRoi = false;
+                    if (currentRoi) {
+                        drawRoiBox();
+                    } else {
+                        clearRoiBox();
+                    }
+                }
+            };
+        }
+
+        // Remove ROI drawing handlers
+        function removeRoiDrawing() {
+            if (roiCanvas) {
+                roiCanvas.onmousedown = null;
+                roiCanvas.onmousemove = null;
+                roiCanvas.onmouseup = null;
+            }
+        }
+
+        // Save ROI settings
+        async function saveRoiSettings() {
+            if (!currentCctvId || !currentRoi) {
+                alert('Silakan gambar area deteksi terlebih dahulu!');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/roi/${currentCctvId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        roi: currentRoi,
+                        enabled: true
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert('Area deteksi berhasil disimpan!');
+                    toggleRoiMode();
+                } else {
+                    alert('Gagal menyimpan area deteksi: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error saving ROI:', error);
+                alert('Gagal menyimpan area deteksi');
+            }
+        }
+
+        // ============ Demo Mode ============
+        let demoInterval = null;
+        let isDemoMode = false;
+
+
+
+        function startDemo() {
+            // Mock data matched to the actual video feed coordinates
+            // Adjusted for likely HD resolution (1920x1080)
+            // Bin seems to be roughly at x=400, y=400, w=500, h=400
+            const mockDetections = [
+                {
+                    class: "Sampah_Overload",
+                    score: 0.72,
+                    bbox: [420, 500, 400, 200] // Inside the container (Top part)
+                },
+                {
+                    class: "Bak Sampah",
+                    score: 0.95,
+                    bbox: [400, 480, 450, 350] // The main bin body
+                },
+                // Scattered Trash 1 (At the red circle location - Bottom Left overlap)
+                {
+                    class: "Sampah_Berserakan",
+                    score: 0.88,
+                    // Bin: x=0.30, y=0.42, w=0.40, h=0.40 (Ends at y=0.82)
+                    // Circle is roughly at x=0.32, y=0.72
+                    bbox: [width * 0.32, height * 0.72, width * 0.12, height * 0.15]
+                },
+                // Person Throwing Trash (Orang Buang Sampah)
+                {
+                    class: "Orang_Buang_Sampah",
+                    score: 0.92,
+                    // Positioned standing next to the bin
+                    bbox: [width * 0.70, height * 0.45, width * 0.15, height * 0.45]
+                }
+            ];
+
+            currentDetections = mockDetections;
+
+            // Force redraw immediately
+            if (detectionCanvas && detectionCtx) {
+                detectionCtx.clearRect(0, 0, detectionCanvas.width, detectionCanvas.height);
+                drawBoundingBoxes(detectionCtx, detectionCanvas.width, detectionCanvas.height, currentDetections);
+                // Also update the detection panel
+                updateDetectionInfo(currentDetections);
+            }
+
+            // Keep updating in case frame clears it
+            demoInterval = setInterval(() => {
+                // Re-calculate in case canvas resizes (though unlikely during modal)
+                currentDetections = mockDetections;
+                if (detectionCanvas && detectionCtx) {
+                    drawBoundingBoxes(detectionCtx, detectionCanvas.width, detectionCanvas.height, currentDetections);
+                    // Update panel periodically
+                    updateDetectionInfo(currentDetections);
+                }
+            }, 100);
+
+            console.log('Demo mode started with relative coords');
+        }
+
+        function stopDemo() {
+            if (demoInterval) {
+                clearInterval(demoInterval);
+                demoInterval = null;
+            }
+            currentDetections = [];
+            // Clear canvas
+            if (detectionCanvas && detectionCtx) {
+                detectionCtx.clearRect(0, 0, detectionCanvas.width, detectionCanvas.height);
+            }
+            console.log('Demo mode stopped');
+        }
+
+        // Reset ROI
+        async function resetRoiSettings() {
+            if (!currentCctvId) return;
+
+            if (!confirm('Hapus area deteksi? Detection akan menggunakan seluruh frame.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/roi/${currentCctvId}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    currentRoi = null;
+                    clearRoiBox();
+                    toggleRoiMode();
+                    alert('Area deteksi berhasil dihapus!');
+                } else {
+                    alert('Gagal menghapus area deteksi: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error resetting ROI:', error);
+                alert('Gagal menghapus area deteksi');
+            }
+        }
+
+        // Cancel ROI editing
+        function cancelRoiEditing() {
+            toggleRoiMode();
+            loadRoiSettings(currentCctvId);
+        }
+
+
+        // Update detection info display
+        function updateDetectionInfo(detectionData) {
+            const container = document.getElementById('video-info');
+            if (!container) return;
+
+            // Handle different data structures
+            let detections = [];
+            let isOverloaded = false;
+            let containerCount = 0;
+            let overloadCount = 0;
+            let scatteredCount = 0;
+
+            if (Array.isArray(detectionData)) {
+                // If input is just the array of detections
+                detections = detectionData;
+            } else if (detectionData && detectionData.detections) {
+                // If input is object with detections array
+                detections = detectionData.detections;
+                isOverloaded = detectionData.isOverloaded; // Use server's flag if available
+            } else if (detectionData) {
+                // Legacy support or count-only objects
+                isOverloaded = detectionData.isOverloaded;
+                containerCount = detectionData.containerCount || 0;
+                overloadCount = detectionData.overloadCount || 0;
+            }
+
+            // Calculate counts if we have the detections array
+            if (detections.length > 0) {
+                containerCount = detections.filter(d => d.class === 'Bak Sampah' || d.class === 'Container').length;
+                overloadCount = detections.filter(d => d.class === 'Sampah_Overload').length;
+                scatteredCount = detections.filter(d => d.class === 'Sampah_Berserakan').length;
+
+                // Recalculate isOverloaded if not provided or to be safe
+                // Logic: Overloaded if "Sampah_Overload" is detected
+                if (overloadCount > 0) isOverloaded = true;
+                else isOverloaded = false;
+            }
+
+            // Add or update detection info
+            let detectionInfo = container.querySelector('.detection-info');
+            if (!detectionInfo) {
+                detectionInfo = document.createElement('div');
+                detectionInfo.className = 'detection-info';
+                // Removed gridColumn = '1 / -1'
+                detectionInfo.style.flex = '0 0 45%'; // Take 45% width on the right
+                detectionInfo.style.padding = '8px';
+                detectionInfo.style.background = 'rgba(255, 255, 255, 0.02)'; // Slightly distinct bg or just blend in
+                detectionInfo.style.borderRadius = '10px';
+                detectionInfo.style.border = '1px solid var(--border-color)';
+                container.appendChild(detectionInfo);
+            }
+
+            // User requested format: Status Overload, Sampah Berserakan, Jumlah Bak Sampah
+            detectionInfo.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+                    <i class="fas fa-robot" style="color: var(--accent); font-size: 0.9rem;"></i>
+                    <strong style="color: var(--text-primary); font-size: 0.9rem;">AI Detection Results</strong>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(1, 1fr); gap: 6px; font-size: 0.85rem;">
+                    
+                    <!-- 1. Status Overload -->
+                    <div style="text-align: center; padding: 5px; background: rgba(255, 255, 255, 0.03); border-radius: 8px;">
+                        <div style="color: var(--text-muted); font-size: 0.7rem; margin-bottom: 4px;">Status Overload</div>
+                        <div style="color: ${isOverloaded ? 'var(--danger)' : 'var(--success)'}; font-weight: 700; font-size: 1rem;">
+                            ${isOverloaded ? 'OVERLOAD' : 'NORMAL'}
+                        </div>
+                    </div>
+
+                    <!-- 2. Sampah Berserakan -->
+                    <div style="text-align: center; padding: 5px; background: rgba(255, 255, 255, 0.03); border-radius: 8px;">
+                        <div style="color: var(--text-muted); font-size: 0.7rem; margin-bottom: 4px;">Sampah Berserakan</div>
+                        <div style="color: ${scatteredCount > 0 ? '#eab308' : 'var(--text-primary)'}; font-weight: 700; font-size: 1rem;">
+                            ${scatteredCount} Item
+                        </div>
+                    </div>
+
+                    <!-- 3. Jumlah Bak Sampah -->
+                    <div style="text-align: center; padding: 5px; background: rgba(255, 255, 255, 0.03); border-radius: 8px;">
+                        <div style="color: var(--text-muted); font-size: 0.7rem; margin-bottom: 4px;">Jml Bak Sampah</div>
+                        <div style="color: var(--accent); font-weight: 700; font-size: 1rem;">
+                            ${containerCount} Unit
+                        </div>
+                    </div>
+
+        </div>
+            `;
+        }
+
+        // Close video modal
+        function closeVideoModal() {
+            document.getElementById('video-modal').classList.remove('active');
+            if (activeWebSocket) {
+                activeWebSocket.close();
+                activeWebSocket = null;
+            }
+
+            // Stop demo mode if active
+            stopDemo();
+
+            // Reset detection state
+            currentDetections = [];
+            detectionCanvas = null;
+            detectionCtx = null;
+        }
+
+        // Search filter
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            renderCCTVList(e.target.value);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeVideoModal();
+        });
+
+        // Close modal on overlay click
+        document.getElementById('video-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'video-modal') closeVideoModal();
+        });
+
+        // Toggle Sidebar
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const floatingToggle = document.getElementById('floating-toggle');
+            const toggleBtn = document.getElementById('sidebar-toggle');
+
+            sidebar.classList.toggle('collapsed');
+
+            if (sidebar.classList.contains('collapsed')) {
+                floatingToggle.classList.add('show');
+                toggleBtn.title = 'Tampilkan Panel';
+            } else {
+                floatingToggle.classList.remove('show');
+                toggleBtn.title = 'Sembunyikan Panel';
+                // Refresh map size after sidebar expands
+                setTimeout(() => {
+                    map.invalidateSize();
+                }, 400);
+            }
+
+            // Refresh map size
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 50);
+        }
+
+        // Update floating badge count
+        function updateFloatingCount() {
+            document.getElementById('floating-count').textContent = cctvData.length;
+        }
+
+        // Global error handler
+        window.addEventListener('error', (event) => {
+            console.error('Global error:', event.error);
+            // Show error message to user if page is blank
+            if (!document.body.querySelector('.header')) {
+                document.body.innerHTML = `
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #0c1222; color: #f8fafc; padding: 2rem; text-align: center;">
+                        <h1 style="color: #ef4444; margin-bottom: 1rem;">⚠️ Error Memuat Aplikasi</h1>
+                        <p style="color: #94a3b8; margin-bottom: 0.5rem;">Terjadi kesalahan saat memuat aplikasi.</p>
+                        <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 1.5rem;">${event.error?.message || 'Unknown error'}</p>
+                        <button onclick="location.reload()" style="padding: 0.75rem 1.5rem; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem;">
+                            Muat Ulang Halaman
+                        </button>
+                    </div>
+                `;
+            }
+        });
+
+        // Unhandled promise rejection handler
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Unhandled promise rejection:', event.reason);
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                initMap();
+                loadCCTV();
+                loadTrashBins();
+
+                // Resize map after load (sidebar hidden by default)
+                setTimeout(() => {
+                    if (map) {
+                        map.invalidateSize();
+                    }
+                }, 100);
+            } catch (error) {
+                console.error('Error initializing application:', error);
+                document.body.innerHTML = `
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #0c1222; color: #f8fafc; padding: 2rem; text-align: center;">
+                        <h1 style="color: #ef4444; margin-bottom: 1rem;">⚠️ Error Inisialisasi</h1>
+                        <p style="color: #94a3b8; margin-bottom: 0.5rem;">Gagal menginisialisasi aplikasi.</p>
+                        <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 1.5rem;">${error.message}</p>
+                        <button onclick="location.reload()" style="padding: 0.75rem 1.5rem; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem;">
+                            Muat Ulang Halaman
+                        </button>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+
+</html>

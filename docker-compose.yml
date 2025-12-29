@@ -1,0 +1,32 @@
+services:
+  webgis-cctv:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: webgis-cctv
+    restart: unless-stopped
+    ports:
+      - "3008:3008"
+    environment:
+      - NODE_ENV=production
+      - PORT=3008
+      - DATA_DIR=/app/data
+    volumes:
+      # Mount database untuk persistensi data
+      - ./data:/app/data
+      # Mount untuk custom YOLO model (optional)
+      - ./yolov8n.pt:/app/yolov8n.pt:ro
+      - ./trash_detection.pt:/app/trash_detection.pt:ro
+    networks:
+      - webgis-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3008/api/cctv', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  webgis-network:
+    driver: bridge
+

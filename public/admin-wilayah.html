@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Wilayah - CCTV Kabupaten Konawe</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    
+    <style>
+        :root {
+            --bg-primary: #0c1222;
+            --bg-secondary: #141d2f;
+            --bg-card: #1a2642;
+            --bg-card-hover: #223054;
+            --border-color: #2a3a5c;
+            --accent: #3b82f6;
+            --accent-light: #60a5fa;
+            --accent-glow: rgba(59, 130, 246, 0.25);
+            --success: #22c55e;
+            --warning: #eab308;
+            --danger: #ef4444;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-logo {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--accent) 0%, #1d4ed8 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+        }
+
+        .header-title h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .header-title span {
+            font-size: 0.75rem;
+            color: var(--warning);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 500;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent) 0%, #1d4ed8 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+        }
+
+        .main-content {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .table-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+        }
+
+        th {
+            background: var(--bg-secondary);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        td {
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        tr:hover td {
+            background: rgba(59, 130, 246, 0.03);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .action-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .action-btn.edit:hover { border-color: var(--warning); color: var(--warning); }
+        .action-btn.delete:hover { border-color: var(--danger); color: var(--danger); }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 2rem;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: none;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover { background: var(--danger); color: white; }
+
+        .modal-body { padding: 1.5rem; }
+
+        .form-group { margin-bottom: 1.25rem; }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .form-group textarea {
+            min-height: 200px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .file-upload {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload:hover {
+            border-color: var(--accent);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .file-upload i {
+            font-size: 3rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .file-upload input {
+            display: none;
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 280px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(100%); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .toast.success { border-left: 4px solid var(--success); }
+        .toast.error { border-left: 4px solid var(--danger); }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <div class="header-logo">
+                <i class="fas fa-map"></i>
+            </div>
+            <div class="header-title">
+                <h1>Manajemen Wilayah</h1>
+                <span>CCTV Kabupaten Konawe</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <a href="/" class="btn btn-secondary">
+                <i class="fas fa-map"></i> Peta
+            </a>
+            <a href="/admin.html" class="btn btn-secondary">
+                <i class="fas fa-video"></i> CCTV
+            </a>
+            <a href="/admin-users.html" class="btn btn-secondary">
+                <i class="fas fa-users"></i> Users
+            </a>
+            <button class="btn btn-primary" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('kecamatan')">
+                <i class="fas fa-map-marked-alt"></i> Kecamatan
+            </button>
+            <button class="tab" onclick="switchTab('kelurahan')">
+                <i class="fas fa-home"></i> Kelurahan/Desa
+            </button>
+        </div>
+
+        <!-- Kecamatan Tab -->
+        <div class="tab-content active" id="kecamatan-tab">
+            <div class="page-header">
+                <h2 class="page-title">Daftar Kecamatan</h2>
+                <button class="btn btn-primary" onclick="openKecamatanModal()">
+                    <i class="fas fa-plus"></i> Tambah Kecamatan
+                </button>
+            </div>
+            <div class="table-container">
+                <div class="table-header">
+                    <h3><i class="fas fa-list"></i> Data Kecamatan</h3>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Kode</th>
+                            <th>Nama</th>
+                            <th>Kabupaten</th>
+                            <th>Provinsi</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="kecamatan-table"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Kelurahan Tab -->
+        <div class="tab-content" id="kelurahan-tab">
+            <div class="page-header">
+                <h2 class="page-title">Daftar Kelurahan/Desa</h2>
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <label style="color: var(--text-secondary); font-size: 0.9rem; white-space: nowrap;">
+                            <i class="fas fa-filter"></i> Filter Kecamatan:
+                        </label>
+                        <select id="kelurahan-filter-kecamatan" onchange="filterKelurahanByKecamatan()" style="
+                            padding: 8px 12px;
+                            border-radius: 8px;
+                            border: 1px solid var(--border-color);
+                            background: var(--bg-card);
+                            color: var(--text-primary);
+                            font-family: inherit;
+                            font-size: 0.9rem;
+                            min-width: 200px;
+                            cursor: pointer;
+                        ">
+                            <option value="">Semua Kecamatan</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="openKelurahanModal()">
+                        <i class="fas fa-plus"></i> Tambah Kelurahan
+                    </button>
+                </div>
+            </div>
+            <div class="table-container">
+                <div class="table-header">
+                    <h3><i class="fas fa-list"></i> Data Kelurahan/Desa</h3>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Kode</th>
+                            <th>Nama</th>
+                            <th>Kecamatan</th>
+                            <th>Jenis</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="kelurahan-table"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Kecamatan Modal -->
+    <div class="modal-overlay" id="kecamatan-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-map-marked-alt"></i> <span id="kecamatan-modal-title">Tambah Kecamatan</span></h3>
+                <button class="modal-close" onclick="closeKecamatanModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="kecamatan-form">
+                    <input type="hidden" id="kecamatan-id">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="kecamatan-kode">Kode *</label>
+                            <input type="text" id="kecamatan-kode" required placeholder="031">
+                        </div>
+                        <div class="form-group">
+                            <label for="kecamatan-nama">Nama *</label>
+                            <input type="text" id="kecamatan-nama" required placeholder="Nama Kecamatan">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="kecamatan-kabupaten">Kabupaten</label>
+                            <input type="text" id="kecamatan-kabupaten" value="Konawe">
+                        </div>
+                        <div class="form-group">
+                            <label for="kecamatan-provinsi">Provinsi</label>
+                            <input type="text" id="kecamatan-provinsi" value="Sulawesi Tenggara">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="kecamatan-luas">Luas (km²)</label>
+                            <input type="number" id="kecamatan-luas" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label for="kecamatan-warna">Warna</label>
+                            <input type="color" id="kecamatan-warna" value="#fbbf24">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Upload GeoJSON *</label>
+                        <div class="file-upload" onclick="document.getElementById('kecamatan-geojson-file').click()">
+                            <i class="fas fa-file-upload"></i>
+                            <p>Klik untuk upload file GeoJSON</p>
+                            <small id="kecamatan-file-name" style="color: var(--text-muted);">Tidak ada file dipilih</small>
+                        </div>
+                        <input type="file" id="kecamatan-geojson-file" accept=".geojson,.json" onchange="handleKecamatanFileUpload(event)">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="kecamatan-geojson">GeoJSON *</label>
+                        <textarea id="kecamatan-geojson" required placeholder='{"type":"FeatureCollection","features":[...]}'></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeKecamatanModal()">Batal</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Simpan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kelurahan Modal -->
+    <div class="modal-overlay" id="kelurahan-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-home"></i> <span id="kelurahan-modal-title">Tambah Kelurahan</span></h3>
+                <button class="modal-close" onclick="closeKelurahanModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="kelurahan-form">
+                    <input type="hidden" id="kelurahan-id">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="kelurahan-kode">Kode *</label>
+                            <input type="text" id="kelurahan-kode" required placeholder="006">
+                        </div>
+                        <div class="form-group">
+                            <label for="kelurahan-nama">Nama *</label>
+                            <input type="text" id="kelurahan-nama" required placeholder="Nama Kelurahan">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="kelurahan-kecamatan">Kecamatan</label>
+                            <select id="kelurahan-kecamatan" onchange="updateKelurahanKecamatan()">
+                                <option value="">-- Pilih Kecamatan --</option>
+                            </select>
+                            <input type="hidden" id="kelurahan-kecamatan-nama">
+                        </div>
+                        <div class="form-group">
+                            <label for="kelurahan-jenis">Jenis</label>
+                            <select id="kelurahan-jenis">
+                                <option value="kelurahan">Kelurahan</option>
+                                <option value="desa">Desa</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="kelurahan-luas">Luas (km²)</label>
+                            <input type="number" id="kelurahan-luas" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label for="kelurahan-warna">Warna</label>
+                            <input type="color" id="kelurahan-warna" value="#22c55e">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Upload GeoJSON *</label>
+                        <div class="file-upload" onclick="document.getElementById('kelurahan-geojson-file').click()">
+                            <i class="fas fa-file-upload"></i>
+                            <p>Klik untuk upload file GeoJSON</p>
+                            <small id="kelurahan-file-name" style="color: var(--text-muted);">Tidak ada file dipilih</small>
+                        </div>
+                        <input type="file" id="kelurahan-geojson-file" accept=".geojson,.json" onchange="handleKelurahanFileUpload(event)">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="kelurahan-geojson">GeoJSON *</label>
+                        <textarea id="kelurahan-geojson" required placeholder='{"type":"FeatureCollection","features":[...]}'></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeKelurahanModal()">Batal</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Simpan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script>
+        let kecamatanData = [];
+        let kelurahanData = [];
+        let filteredKelurahanData = [];
+        let currentKecamatanId = null;
+        let currentKelurahanId = null;
+        let selectedKecamatanFilter = '';
+
+        // Check auth
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+        });
+
+        function checkAuth() {
+            const token = localStorage.getItem('adminToken');
+            const userData = localStorage.getItem('adminUser');
+            
+            if (!token || !userData) {
+                window.location.href = '/admin.html';
+                return;
+            }
+
+            try {
+                const user = JSON.parse(userData);
+                if (user.role !== 'admin') {
+                    window.location.href = '/admin.html';
+                    return;
+                }
+                
+                loadKecamatan();
+                loadKelurahan();
+                loadKecamatanOptions();
+            } catch (e) {
+                window.location.href = '/admin.html';
+            }
+        }
+
+        function getAuthHeaders() {
+            const token = localStorage.getItem('adminToken');
+            console.log('Getting auth headers, token exists:', !!token);
+            if (!token) {
+                console.error('No token found in localStorage');
+                showToast('error', 'Error', 'Session telah berakhir. Silakan login ulang.');
+                setTimeout(() => {
+                    window.location.href = '/admin.html';
+                }, 2000);
+                return {};
+            }
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            };
+            console.log('Auth header created, token length:', token.length);
+            return headers;
+        }
+        
+        function validateToken() {
+            const token = localStorage.getItem('adminToken');
+            const userData = localStorage.getItem('adminUser');
+            
+            if (!token || !userData) {
+                return false;
+            }
+            
+            try {
+                const user = JSON.parse(userData);
+                return user.role === 'admin';
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminUser');
+            localStorage.removeItem('adminName');
+            window.location.href = '/admin.html';
+        }
+
+        // Tabs
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tab + '-tab').classList.add('active');
+        }
+
+        // Load Data
+        async function loadKecamatan() {
+            try {
+                const res = await fetch('/api/kecamatan');
+                const result = await res.json();
+                if (result.success) {
+                    kecamatanData = result.data;
+                    renderKecamatanTable();
+                }
+            } catch (e) {
+                showToast('error', 'Error', 'Gagal memuat data kecamatan');
+            }
+        }
+
+        async function loadKelurahan() {
+            try {
+                const res = await fetch('/api/kelurahan');
+                const result = await res.json();
+                if (result.success) {
+                    kelurahanData = result.data;
+                    filterKelurahanByKecamatan();
+                }
+            } catch (e) {
+                showToast('error', 'Error', 'Gagal memuat data kelurahan');
+            }
+        }
+        
+        function filterKelurahanByKecamatan() {
+            const filterSelect = document.getElementById('kelurahan-filter-kecamatan');
+            selectedKecamatanFilter = filterSelect ? filterSelect.value : '';
+            
+            if (!selectedKecamatanFilter || selectedKecamatanFilter === '') {
+                filteredKelurahanData = kelurahanData;
+            } else {
+                filteredKelurahanData = kelurahanData.filter(k => k.kecamatan_id === selectedKecamatanFilter);
+            }
+            
+            renderKelurahanTable();
+        }
+
+        async function loadKecamatanOptions() {
+            try {
+                const res = await fetch('/api/kecamatan');
+                const result = await res.json();
+                if (result.success) {
+                    // Store kecamatan data for later use
+                    kecamatanData = result.data;
+                    
+                    // Populate form select
+                    const select = document.getElementById('kelurahan-kecamatan');
+                    if (select) {
+                        select.innerHTML = '<option value="">-- Pilih Kecamatan --</option>' +
+                            result.data.map(k => `<option value="${k.id}">${k.nama}</option>`).join('');
+                    }
+                    
+                    // Populate filter select
+                    const filterSelect = document.getElementById('kelurahan-filter-kecamatan');
+                    if (filterSelect) {
+                        filterSelect.innerHTML = '<option value="">Semua Kecamatan</option>' +
+                            result.data.map(k => `<option value="${k.id}">${k.nama}</option>`).join('');
+                        
+                        // Restore selected filter if exists
+                        if (selectedKecamatanFilter) {
+                            filterSelect.value = selectedKecamatanFilter;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('Error loading kecamatan options:', e);
+            }
+        }
+
+        function updateKelurahanKecamatan() {
+            const select = document.getElementById('kelurahan-kecamatan');
+            const selected = kecamatanData.find(k => k.id === select.value);
+            if (selected) {
+                document.getElementById('kelurahan-kecamatan-nama').value = selected.nama;
+            }
+        }
+
+        // Render Tables
+        function renderKecamatanTable() {
+            const tbody = document.getElementById('kecamatan-table');
+            if (kecamatanData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-muted);">Tidak ada data</td></tr>';
+                return;
+            }
+            tbody.innerHTML = kecamatanData.map(k => `
+                <tr>
+                    <td>${k.kode}</td>
+                    <td>${k.nama}</td>
+                    <td>${k.kabupaten}</td>
+                    <td>${k.provinsi}</td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="action-btn edit" onclick="editKecamatan('${k.id}')" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete" onclick="deleteKecamatan('${k.id}')" title="Hapus">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderKelurahanTable() {
+            const tbody = document.getElementById('kelurahan-table');
+            const dataToRender = filteredKelurahanData.length > 0 ? filteredKelurahanData : kelurahanData;
+            
+            if (dataToRender.length === 0) {
+                const message = selectedKecamatanFilter ? 
+                    'Tidak ada kelurahan untuk kecamatan yang dipilih' : 
+                    'Tidak ada data';
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-muted);">${message}</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = dataToRender.map(k => `
+                <tr>
+                    <td>${k.kode}</td>
+                    <td>${k.nama}</td>
+                    <td>${k.kecamatan_nama || '-'}</td>
+                    <td>${k.jenis === 'desa' ? 'Desa' : 'Kelurahan'}</td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="action-btn edit" onclick="editKelurahan('${k.id}')" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete" onclick="deleteKelurahan('${k.id}')" title="Hapus">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Kecamatan CRUD
+        function openKecamatanModal() {
+            document.getElementById('kecamatan-modal-title').textContent = 'Tambah Kecamatan';
+            document.getElementById('kecamatan-form').reset();
+            document.getElementById('kecamatan-id').value = '';
+            document.getElementById('kecamatan-file-name').textContent = 'Tidak ada file dipilih';
+            document.getElementById('kecamatan-modal').classList.add('active');
+        }
+
+        function closeKecamatanModal() {
+            document.getElementById('kecamatan-modal').classList.remove('active');
+        }
+
+        function handleKecamatanFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                return;
+            }
+
+            // Validate file type
+            const fileName = file.name.toLowerCase();
+            if (!fileName.endsWith('.geojson') && !fileName.endsWith('.json')) {
+                showToast('error', 'Error', 'File harus berformat .geojson atau .json');
+                event.target.value = ''; // Reset file input
+                document.getElementById('kecamatan-file-name').textContent = 'Tidak ada file dipilih';
+                return;
+            }
+
+            // Validate file size (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                showToast('error', 'Error', 'Ukuran file terlalu besar. Maksimal 10MB');
+                event.target.value = '';
+                document.getElementById('kecamatan-file-name').textContent = 'Tidak ada file dipilih';
+                return;
+            }
+
+            document.getElementById('kecamatan-file-name').textContent = file.name;
+            const reader = new FileReader();
+            
+            reader.onerror = () => {
+                showToast('error', 'Error', 'Gagal membaca file');
+                event.target.value = '';
+                document.getElementById('kecamatan-file-name').textContent = 'Tidak ada file dipilih';
+            };
+
+            reader.onload = (e) => {
+                try {
+                    const text = e.target.result;
+                    if (!text || text.trim() === '') {
+                        throw new Error('File kosong');
+                    }
+
+                    const geojson = JSON.parse(text);
+                    
+                    // Validate GeoJSON structure
+                    if (!geojson.type) {
+                        throw new Error('Format GeoJSON tidak valid: missing type');
+                    }
+
+                    if (geojson.type === 'FeatureCollection' && !Array.isArray(geojson.features)) {
+                        throw new Error('Format GeoJSON tidak valid: FeatureCollection harus memiliki features array');
+                    }
+
+                    if (geojson.type === 'Feature' && !geojson.geometry) {
+                        throw new Error('Format GeoJSON tidak valid: Feature harus memiliki geometry');
+                    }
+
+                    // Convert to FeatureCollection if it's a single Feature
+                    let finalGeojson = geojson;
+                    if (geojson.type === 'Feature') {
+                        finalGeojson = {
+                            type: 'FeatureCollection',
+                            features: [geojson]
+                        };
+                    }
+
+                    document.getElementById('kecamatan-geojson').value = JSON.stringify(finalGeojson, null, 2);
+                    showToast('success', 'Berhasil', 'File GeoJSON berhasil diupload');
+                } catch (err) {
+                    console.error('GeoJSON parse error:', err);
+                    showToast('error', 'Error', `File GeoJSON tidak valid: ${err.message}`);
+                    event.target.value = '';
+                    document.getElementById('kecamatan-file-name').textContent = 'Tidak ada file dipilih';
+                    document.getElementById('kecamatan-geojson').value = '';
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+
+        document.getElementById('kecamatan-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Validate required fields
+            const geojsonText = document.getElementById('kecamatan-geojson').value.trim();
+            if (!geojsonText) {
+                showToast('error', 'Error', 'GeoJSON harus diisi');
+                return;
+            }
+
+            let geojson;
+            try {
+                geojson = JSON.parse(geojsonText);
+            } catch (err) {
+                showToast('error', 'Error', `GeoJSON tidak valid: ${err.message}`);
+                return;
+            }
+
+            // Validate GeoJSON structure
+            if (!geojson.type) {
+                showToast('error', 'Error', 'Format GeoJSON tidak valid: missing type');
+                return;
+            }
+
+            if (geojson.type === 'FeatureCollection' && (!Array.isArray(geojson.features) || geojson.features.length === 0)) {
+                showToast('error', 'Error', 'FeatureCollection harus memiliki minimal 1 feature');
+                return;
+            }
+
+            const id = document.getElementById('kecamatan-id').value;
+            const data = {
+                kode: document.getElementById('kecamatan-kode').value,
+                nama: document.getElementById('kecamatan-nama').value,
+                kabupaten: document.getElementById('kecamatan-kabupaten').value,
+                provinsi: document.getElementById('kecamatan-provinsi').value,
+                luas: parseFloat(document.getElementById('kecamatan-luas').value) || null,
+                warna: document.getElementById('kecamatan-warna').value,
+                geojson: geojson
+            };
+
+            // Validate token before submitting
+            if (!validateToken()) {
+                showToast('error', 'Error', 'Session telah berakhir. Silakan login ulang.');
+                setTimeout(() => {
+                    window.location.href = '/admin.html';
+                }, 2000);
+                return;
+            }
+
+            // Show loading
+            const submitBtn = document.querySelector('#kecamatan-form button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+
+            try {
+                const url = id ? `/api/kecamatan/${id}` : '/api/kecamatan';
+                const method = id ? 'PUT' : 'POST';
+                
+                const headers = getAuthHeaders();
+                if (!headers.Authorization) {
+                    throw new Error('Token tidak ditemukan');
+                }
+                
+                console.log('Sending request to:', url, 'Method:', method);
+                console.log('Token present:', !!headers.Authorization);
+                console.log('Data size:', JSON.stringify(data).length, 'bytes');
+                
+                const res = await fetch(url, {
+                    method,
+                    headers: headers,
+                    body: JSON.stringify(data)
+                });
+                
+                // Handle 401 Unauthorized
+                if (res.status === 401) {
+                    const errorData = await res.json().catch(() => ({ error: 'Unauthorized' }));
+                    console.error('401 Unauthorized:', errorData);
+                    showToast('error', 'Error', errorData.error || 'Token tidak valid. Silakan login ulang.');
+                    // Clear invalid token
+                    localStorage.removeItem('adminToken');
+                    localStorage.removeItem('adminUser');
+                    localStorage.removeItem('adminName');
+                    setTimeout(() => {
+                        window.location.href = '/admin.html';
+                    }, 2000);
+                    return;
+                }
+                
+                const result = await res.json();
+                console.log('Response status:', res.status);
+                console.log('Response:', result);
+                
+                if (result.success) {
+                    showToast('success', 'Berhasil', id ? 'Kecamatan berhasil diperbarui' : 'Kecamatan berhasil ditambahkan');
+                    closeKecamatanModal();
+                    loadKecamatan();
+                } else {
+                    console.error('Save error:', result);
+                    showToast('error', 'Error', result.error || 'Gagal menyimpan data');
+                }
+            } catch (e) {
+                console.error('Save exception:', e);
+                showToast('error', 'Error', `Gagal menyimpan data: ${e.message}`);
+            } finally {
+                // Restore button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+
+        function editKecamatan(id) {
+            const kec = kecamatanData.find(k => k.id === id);
+            if (kec) {
+                document.getElementById('kecamatan-modal-title').textContent = 'Edit Kecamatan';
+                document.getElementById('kecamatan-id').value = kec.id;
+                document.getElementById('kecamatan-kode').value = kec.kode;
+                document.getElementById('kecamatan-nama').value = kec.nama;
+                document.getElementById('kecamatan-kabupaten').value = kec.kabupaten;
+                document.getElementById('kecamatan-provinsi').value = kec.provinsi;
+                document.getElementById('kecamatan-luas').value = kec.luas || '';
+                document.getElementById('kecamatan-warna').value = kec.warna;
+                document.getElementById('kecamatan-geojson').value = JSON.stringify(JSON.parse(kec.geojson), null, 2);
+                document.getElementById('kecamatan-modal').classList.add('active');
+            }
+        }
+
+        async function deleteKecamatan(id) {
+            if (!confirm('Yakin ingin menghapus kecamatan ini?')) return;
+            try {
+                const res = await fetch(`/api/kecamatan/${id}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+                const result = await res.json();
+                if (result.success) {
+                    showToast('success', 'Berhasil', 'Kecamatan berhasil dihapus');
+                    loadKecamatan();
+                } else {
+                    showToast('error', 'Error', result.error);
+                }
+            } catch (e) {
+                showToast('error', 'Error', 'Gagal menghapus data');
+            }
+        }
+
+        // Kelurahan CRUD
+        function openKelurahanModal() {
+            document.getElementById('kelurahan-modal-title').textContent = 'Tambah Kelurahan';
+            document.getElementById('kelurahan-form').reset();
+            document.getElementById('kelurahan-id').value = '';
+            document.getElementById('kelurahan-file-name').textContent = 'Tidak ada file dipilih';
+            loadKecamatanOptions();
+            document.getElementById('kelurahan-modal').classList.add('active');
+        }
+
+        function closeKelurahanModal() {
+            document.getElementById('kelurahan-modal').classList.remove('active');
+        }
+
+        function handleKelurahanFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                return;
+            }
+
+            // Validate file type
+            const fileName = file.name.toLowerCase();
+            if (!fileName.endsWith('.geojson') && !fileName.endsWith('.json')) {
+                showToast('error', 'Error', 'File harus berformat .geojson atau .json');
+                event.target.value = '';
+                document.getElementById('kelurahan-file-name').textContent = 'Tidak ada file dipilih';
+                return;
+            }
+
+            // Validate file size (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                showToast('error', 'Error', 'Ukuran file terlalu besar. Maksimal 10MB');
+                event.target.value = '';
+                document.getElementById('kelurahan-file-name').textContent = 'Tidak ada file dipilih';
+                return;
+            }
+
+            document.getElementById('kelurahan-file-name').textContent = file.name;
+            const reader = new FileReader();
+            
+            reader.onerror = () => {
+                showToast('error', 'Error', 'Gagal membaca file');
+                event.target.value = '';
+                document.getElementById('kelurahan-file-name').textContent = 'Tidak ada file dipilih';
+            };
+
+            reader.onload = (e) => {
+                try {
+                    const text = e.target.result;
+                    if (!text || text.trim() === '') {
+                        throw new Error('File kosong');
+                    }
+
+                    const geojson = JSON.parse(text);
+                    
+                    // Validate GeoJSON structure
+                    if (!geojson.type) {
+                        throw new Error('Format GeoJSON tidak valid: missing type');
+                    }
+
+                    if (geojson.type === 'FeatureCollection' && !Array.isArray(geojson.features)) {
+                        throw new Error('Format GeoJSON tidak valid: FeatureCollection harus memiliki features array');
+                    }
+
+                    if (geojson.type === 'Feature' && !geojson.geometry) {
+                        throw new Error('Format GeoJSON tidak valid: Feature harus memiliki geometry');
+                    }
+
+                    // Convert to FeatureCollection if it's a single Feature
+                    let finalGeojson = geojson;
+                    if (geojson.type === 'Feature') {
+                        finalGeojson = {
+                            type: 'FeatureCollection',
+                            features: [geojson]
+                        };
+                    }
+
+                    document.getElementById('kelurahan-geojson').value = JSON.stringify(finalGeojson, null, 2);
+                    showToast('success', 'Berhasil', 'File GeoJSON berhasil diupload');
+                } catch (err) {
+                    console.error('GeoJSON parse error:', err);
+                    showToast('error', 'Error', `File GeoJSON tidak valid: ${err.message}`);
+                    event.target.value = '';
+                    document.getElementById('kelurahan-file-name').textContent = 'Tidak ada file dipilih';
+                    document.getElementById('kelurahan-geojson').value = '';
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+
+        document.getElementById('kelurahan-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Validate required fields
+            const geojsonText = document.getElementById('kelurahan-geojson').value.trim();
+            if (!geojsonText) {
+                showToast('error', 'Error', 'GeoJSON harus diisi');
+                return;
+            }
+
+            let geojson;
+            try {
+                geojson = JSON.parse(geojsonText);
+            } catch (err) {
+                showToast('error', 'Error', `GeoJSON tidak valid: ${err.message}`);
+                return;
+            }
+
+            // Validate GeoJSON structure
+            if (!geojson.type) {
+                showToast('error', 'Error', 'Format GeoJSON tidak valid: missing type');
+                return;
+            }
+
+            if (geojson.type === 'FeatureCollection' && (!Array.isArray(geojson.features) || geojson.features.length === 0)) {
+                showToast('error', 'Error', 'FeatureCollection harus memiliki minimal 1 feature');
+                return;
+            }
+
+            const id = document.getElementById('kelurahan-id').value;
+            const kecamatanId = document.getElementById('kelurahan-kecamatan').value;
+            const kecamatan = kecamatanData.find(k => k.id === kecamatanId);
+            const data = {
+                kode: document.getElementById('kelurahan-kode').value,
+                nama: document.getElementById('kelurahan-nama').value,
+                kecamatan_id: kecamatanId || null,
+                kecamatan_nama: kecamatan ? kecamatan.nama : null,
+                jenis: document.getElementById('kelurahan-jenis').value,
+                luas: parseFloat(document.getElementById('kelurahan-luas').value) || null,
+                warna: document.getElementById('kelurahan-warna').value,
+                geojson: geojson
+            };
+
+            // Validate token before submitting
+            if (!validateToken()) {
+                showToast('error', 'Error', 'Session telah berakhir. Silakan login ulang.');
+                setTimeout(() => {
+                    window.location.href = '/admin.html';
+                }, 2000);
+                return;
+            }
+
+            // Show loading
+            const submitBtn = document.querySelector('#kelurahan-form button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+
+            try {
+                const url = id ? `/api/kelurahan/${id}` : '/api/kelurahan';
+                const method = id ? 'PUT' : 'POST';
+                
+                const headers = getAuthHeaders();
+                if (!headers.Authorization) {
+                    throw new Error('Token tidak ditemukan');
+                }
+                
+                console.log('Sending request to:', url, 'Method:', method);
+                console.log('Token present:', !!headers.Authorization);
+                console.log('Data size:', JSON.stringify(data).length, 'bytes');
+                
+                const res = await fetch(url, {
+                    method,
+                    headers: headers,
+                    body: JSON.stringify(data)
+                });
+                
+                // Handle 401 Unauthorized
+                if (res.status === 401) {
+                    const errorData = await res.json().catch(() => ({ error: 'Unauthorized' }));
+                    console.error('401 Unauthorized:', errorData);
+                    showToast('error', 'Error', errorData.error || 'Token tidak valid. Silakan login ulang.');
+                    // Clear invalid token
+                    localStorage.removeItem('adminToken');
+                    localStorage.removeItem('adminUser');
+                    localStorage.removeItem('adminName');
+                    setTimeout(() => {
+                        window.location.href = '/admin.html';
+                    }, 2000);
+                    return;
+                }
+                
+                const result = await res.json();
+                console.log('Response status:', res.status);
+                console.log('Response:', result);
+                
+                if (result.success) {
+                    showToast('success', 'Berhasil', id ? 'Kelurahan berhasil diperbarui' : 'Kelurahan berhasil ditambahkan');
+                    closeKelurahanModal();
+                    loadKelurahan();
+                } else {
+                    console.error('Save error:', result);
+                    showToast('error', 'Error', result.error || 'Gagal menyimpan data');
+                }
+            } catch (e) {
+                console.error('Save exception:', e);
+                showToast('error', 'Error', `Gagal menyimpan data: ${e.message}`);
+            } finally {
+                // Restore button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+
+        function editKelurahan(id) {
+            const kel = kelurahanData.find(k => k.id === id);
+            if (kel) {
+                document.getElementById('kelurahan-modal-title').textContent = 'Edit Kelurahan';
+                document.getElementById('kelurahan-id').value = kel.id;
+                document.getElementById('kelurahan-kode').value = kel.kode;
+                document.getElementById('kelurahan-nama').value = kel.nama;
+                document.getElementById('kelurahan-kecamatan').value = kel.kecamatan_id || '';
+                document.getElementById('kelurahan-kecamatan-nama').value = kel.kecamatan_nama || '';
+                document.getElementById('kelurahan-jenis').value = kel.jenis;
+                document.getElementById('kelurahan-luas').value = kel.luas || '';
+                document.getElementById('kelurahan-warna').value = kel.warna;
+                document.getElementById('kelurahan-geojson').value = JSON.stringify(JSON.parse(kel.geojson), null, 2);
+                loadKecamatanOptions().then(() => {
+                    // Set kecamatan_nama after options loaded
+                    if (kel.kecamatan_id) {
+                        const selected = kecamatanData.find(k => k.id === kel.kecamatan_id);
+                        if (selected) {
+                            document.getElementById('kelurahan-kecamatan-nama').value = selected.nama;
+                        }
+                    }
+                });
+                document.getElementById('kelurahan-modal').classList.add('active');
+            }
+        }
+
+        async function deleteKelurahan(id) {
+            if (!confirm('Yakin ingin menghapus kelurahan ini?')) return;
+            try {
+                const res = await fetch(`/api/kelurahan/${id}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+                const result = await res.json();
+                if (result.success) {
+                    showToast('success', 'Berhasil', 'Kelurahan berhasil dihapus');
+                    loadKelurahan();
+                } else {
+                    showToast('error', 'Error', result.error);
+                }
+            } catch (e) {
+                showToast('error', 'Error', 'Gagal menghapus data');
+            }
+        }
+
+        // Toast
+        function showToast(type, title, message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                <div><strong>${title}</strong><br><small style="color:var(--text-secondary)">${message}</small></div>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
+
